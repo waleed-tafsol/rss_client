@@ -9,6 +9,8 @@ class AppTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final bool showLabel;
   final String? hint;
+  final bool hide;
+  final Widget? suffix;
   const AppTextField({
     super.key,
     this.controller,
@@ -16,6 +18,8 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.showLabel = true,
     this.hint,
+    this.hide = false,
+    this.suffix,
   });
 
   @override
@@ -27,7 +31,11 @@ class AppTextField extends StatelessWidget {
         if (showLabel) Text(title, style: AppFonts.black14w400),
         TextFormField(
           controller: controller,
-          decoration: InputDecoration(hintText: hint ?? 'Enter $title'),
+          obscureText: hide,
+          decoration: InputDecoration(
+            hintText: hint ?? 'Enter $title',
+            suffixIcon: suffix,
+          ),
           validator: validator,
         ),
       ],

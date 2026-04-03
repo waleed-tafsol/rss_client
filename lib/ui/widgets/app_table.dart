@@ -1,15 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../../utils/enums.dart';
-import '../resources/app_colors.dart';
-import '../resources/app_fonts.dart';
-import '../../utils/context_utils.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
+import '../../utils/context_utils.dart';
+import '../../utils/enums.dart';
+import '../resources/app_colors.dart';
+import '../resources/app_fonts.dart';
 import '../screens/dashboard/client_update.dart';
 import '../screens/dashboard/surveryor_update.dart';
 import '../screens/dashboard/surveyor_details.dart';
@@ -156,9 +156,9 @@ class AppTable extends StatelessWidget {
               title: Text('View Details', style: AppFonts.grey14w400),
               contentPadding: EdgeInsets.zero,
             ),
-            Consumer<UserManagementViewModel>(
-              builder: (context, userManagementViewModel, _) {
-                final userType = userManagementViewModel.userType;
+            Consumer(
+              builder: (context, ref, _) {
+                final userType = ref.watch(userManagementProvider);
                 return ListTile(
                   onTap: () {
                     if (userType == UserType.surveyors) {
@@ -213,7 +213,7 @@ class AppTable extends StatelessWidget {
   Widget _buildStatus(String status) {
     final bool isActive = status == 'Active';
     final Color color = isActive ? const Color(0xFF4CAF50) : AppColors.grey;
-    return  Row(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -228,7 +228,7 @@ class AppTable extends StatelessWidget {
         ),
       ],
     );
- }
+  }
 
   static const List<String> _headerLabels = [
     'Name',

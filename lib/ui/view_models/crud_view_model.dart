@@ -1,12 +1,17 @@
-import '../../utils/enums.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
-class CrudViewModel extends BaseViewModel {
-  CrudType crudType = CrudType.stock;
+final crudProvider = NotifierProvider.autoDispose(() => CrudViewModel._());
+
+class CrudViewModel extends BaseViewModel<CrudType> {
+  CrudViewModel._() : super(CrudType.stock);
 
   void setCrudType(CrudType newCrudType) {
-    crudType = newCrudType;
-    notifyListeners();
+    if (state == newCrudType) {
+      return;
+    }
+    state = newCrudType;
   }
 }

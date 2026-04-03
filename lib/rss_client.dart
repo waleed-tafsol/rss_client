@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
 import 'main.dart';
 import 'routes/app_routes.dart';
 import 'ui/resources/design_size.dart';
 import 'ui/themes/app_theme.dart';
-import 'ui/view_models/app_view_model.dart';
 import 'utils/context_utils.dart';
 
 class RssClient extends StatelessWidget {
@@ -32,12 +30,7 @@ class RssClient extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
-          builder: (context, child) {
-            return ChangeNotifierProvider(
-              create: (_) => AppViewModel(),
-              child: FlutterEasyLoading(child: child),
-            );
-          },
+          builder: EasyLoading.init(),
           routerConfig: AppRoutes.router,
         );
       },

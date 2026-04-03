@@ -1,40 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../utils/context_utils.dart';
+import '../../utils/validators.dart';
 import '../resources/app_assets.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
-import '../view_models/app_view_model.dart';
+import '../view_models/auth_view_model.dart';
 import '../widgets/app_gradient_button.dart';
+import '../widgets/app_loader.dart';
 import '../widgets/app_text_field.dart';
 import 'dashboard/overview_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   static const String routeName = '/login';
 
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final ValueNotifier<bool> _rememberMe = ValueNotifier<bool>(true);
   final _forgotPassword = ValueNotifier(false);
+  final _hidePassword = ValueNotifier(true);
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  void _onSignInPressed() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    ref
+        .read(authProvider.notifier)
+        .login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+  }
+
+  void _listener(AuthState? prev, AuthState next) {
+    if (next.user != null) {
+      context.go(OverViewScreen.routeName);
+    }
+  }
 
   @override
   void dispose() {
     _rememberMe.dispose();
     _forgotPassword.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _hidePassword.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authProvider, _listener);
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(context.isLandscape ? 16.w : 20.sp),
@@ -46,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   left: context.isLandscape ? 64.w : 0,
                   right: context.isLandscape ? 20.w : 0,
                 ),
-                child: _buildBody(context),
+                child: Form(key: _formKey, child: _buildBody(context)),
               ),
             ),
             if (context.isLandscape)
@@ -80,9 +108,29 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             SizedBox(height: 40.sp),
-            const AppTextField(title: "Email"),
+            AppTextField(
+              controller: _emailController,
+              title: "Email",
+              validator: Validators.email,
+            ),
             SizedBox(height: 16.sp),
-            const AppTextField(title: "Password"),
+            ValueListenableBuilder(
+              valueListenable: _hidePassword,
+              builder: (context, hidePassword, _) {
+                return AppTextField(
+                  controller: _passwordController,
+                  title: "Password",
+                  validator: Validators.password,
+                  hide: hidePassword,
+                  suffix: IconButton(
+                    onPressed: () => _hidePassword.value = !hidePassword,
+                    icon: Icon(
+                      hidePassword ? TablerIcons.eye : TablerIcons.eyeOff,
+                    ),
+                  ),
+                );
+              },
+            ),
             SizedBox(height: 16.sp),
             Row(
               children: [
@@ -117,12 +165,19 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
             SizedBox(height: 32.sp),
-            AppGradientButton(
-              title: 'Sign In',
-              icon: TablerIcons.arrowRight,
-              onTap: () {
-                context.read<AppViewModel>().setIsLoggedIn(true);
-                context.goNamed(OverViewScreen.routeName);
+            Consumer(
+              builder: (_, ref, _) {
+                final loading = ref.watch(
+                  authProvider.select((s) => s.loading),
+                );
+                if (loading) {
+                  return const AppLoader();
+                }
+                return AppGradientButton(
+                  title: 'Sign In',
+                  icon: TablerIcons.arrowRight,
+                  onTap: _onSignInPressed,
+                );
               },
             ),
           ],

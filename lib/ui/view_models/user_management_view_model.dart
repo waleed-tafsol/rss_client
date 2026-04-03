@@ -1,12 +1,19 @@
-import '../../utils/enums.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
-class UserManagementViewModel extends BaseViewModel {
-  UserType userType = UserType.surveyors;
+final userManagementProvider = NotifierProvider.autoDispose(
+  () => UserManagementViewModel._(),
+);
+
+class UserManagementViewModel extends BaseViewModel<UserType> {
+  UserManagementViewModel._() : super(UserType.surveyors);
 
   void changeUserType(UserType newUserType) {
-    userType = newUserType;
-    notifyListeners();
+    if (newUserType == state) {
+      return;
+    }
+    state = UserType.surveyors;
   }
 }

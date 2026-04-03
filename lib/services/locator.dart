@@ -1,6 +1,16 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+
+import '../api/api_constants.dart';
+import '../api/auth_api.dart';
+import '../exceptions/app_exception.dart';
+import '../models/requests/login_request.dart';
+import '../models/responses/auth_response.dart';
 
 part 'auth_service.dart';
 part 'storage_service.dart';
@@ -9,6 +19,34 @@ final locator = GetIt.instance;
 
 Future<void> initializeServices() async {
   await locator.reset();
+  final dio = Dio();
+  dio.options = BaseOptions(
+    validateStatus: (_) => true,
+    baseUrl: ApiConstants.baseUrl,
+  );
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final accessToken = await locator<StorageService>().getAccessToken();
+        log('ACCESS TOKEN: $accessToken');
+        if (accessToken != null) {
+          options.headers['Authorization'] = 'Bearer $accessToken';
+        }
+        log('URL: ${options.uri}');
+        log('REQUEST: ${options.data}');
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        log('RESPONSE: ${response.data}');
+        handler.next(response);
+      },
+    ),
+  );
+
+  // APIS
+  locator..registerLazySingleton(() => AuthApi(dio));
+
+  // Services
   locator
     ..registerLazySingleton(() => StorageService._())
     ..registerLazySingleton(() => AuthService._());

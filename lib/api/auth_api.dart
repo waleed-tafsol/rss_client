@@ -1,0 +1,16 @@
+import 'package:dio/dio.dart';
+import 'package:retrofit/error_logger.dart';
+import 'package:retrofit/http.dart';
+
+import '../models/requests/login_request.dart';
+import '../models/responses/auth_response.dart';
+
+part 'auth_api.g.dart';
+
+@RestApi()
+abstract class AuthApi {
+  factory AuthApi(Dio dio, {String? baseUrl}) = _AuthApi;
+
+  @POST('/login')
+  Future<AuthResponse> login(@Body() LoginRequest body);
+}
