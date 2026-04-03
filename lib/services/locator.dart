@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import '../api/api_constants.dart';
 import '../api/auth_api.dart';
 import '../exceptions/app_exception.dart';
+import '../models/requests/email_request.dart';
 import '../models/requests/login_request.dart';
 import '../models/responses/auth_response.dart';
 

@@ -15,4 +15,21 @@ class AuthService {
     await locator<StorageService>().saveUser(response.data?.user);
     return response.data?.user;
   }
+
+  Future<void> logout() async {
+    final response = await locator<AuthApi>().logout();
+    if (!(response.success ?? false)) {
+      throw AppException(response.message ?? 'Something went wrong!');
+    }
+    await locator<StorageService>().clear();
+  }
+
+  Future<void> forgotPassword({required String email}) async {
+    final response = await locator<AuthApi>().forgotPassword(
+      EmailRequest(email: email),
+    );
+    if (!(response.success ?? false)) {
+      throw AppException(response.message ?? 'Something went wrong!');
+    }
+  }
 }

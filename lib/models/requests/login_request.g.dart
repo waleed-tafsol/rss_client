@@ -7,4 +7,14 @@ part of 'login_request.dart';
 // **************************************************************************
 
 Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
-    <String, dynamic>{'email': instance.email, 'password': instance.password};
+    <String, dynamic>{
+      'email': instance.email,
+      'password': instance.password,
+      'role': _$UserTypeEnumMap[instance.role]!,
+    };
+
+const _$UserTypeEnumMap = {
+  UserType.client: 'client',
+  UserType.surveyor: 'surveyor',
+  UserType.admin: 'admin',
+};

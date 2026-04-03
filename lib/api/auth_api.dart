@@ -2,8 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/error_logger.dart';
 import 'package:retrofit/http.dart';
 
+import '../models/requests/email_request.dart';
 import '../models/requests/login_request.dart';
 import '../models/responses/auth_response.dart';
+import '../models/responses/base_response.dart';
 
 part 'auth_api.g.dart';
 
@@ -13,4 +15,10 @@ abstract class AuthApi {
 
   @POST('/login')
   Future<AuthResponse> login(@Body() LoginRequest body);
+
+  @POST('/logout')
+  Future<BaseResponse> logout();
+
+  @POST('/forgot-password')
+  Future<BaseResponse> forgotPassword(@Body() EmailRequest request);
 }

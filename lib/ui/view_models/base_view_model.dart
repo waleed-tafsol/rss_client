@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -24,6 +25,10 @@ abstract class BaseViewModel<S> extends Notifier<S> {
     } on AppException catch (e, s) {
       log(e.message, stackTrace: s);
       handleError(e.message);
+      return null;
+    } on DioException catch (e, s) {
+      log(e.message ?? 'Something went wrong', stackTrace: s);
+      handleError(e.message ?? 'Something went wrong');
       return null;
     } catch (e, s) {
       log(e.toString(), stackTrace: s);
