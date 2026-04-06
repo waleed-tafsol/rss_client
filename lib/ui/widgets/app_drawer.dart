@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,8 +12,8 @@ import '../resources/app_assets.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
 import '../screens/dashboard/overview_screen.dart';
+import '../screens/dashboard/properties.dart';
 import '../screens/dashboard/settings.dart';
-import '../screens/dashboard/surveyors_analytics.dart';
 import 'app_gradient_button.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -42,7 +44,7 @@ class _AppDrawerState extends State<AppDrawer> {
     const RailItem(
       icon: TablerIcons.mapPin,
       label: 'Properties',
-      routeName: SurveyorsAnalytics.routeName,
+      routeName: Properties.routeName,
     ),
   ];
 
@@ -119,8 +121,9 @@ class _AppDrawerState extends State<AppDrawer> {
               label: item.label,
               icon: item.icon,
               onTap: () {
+                log('Tapped on ${item.label}, route: ${item.routeName}');
                 widget.controller.selectIndex(_items.indexOf(item));
-                context.go(item.routeName);
+                context.goNamed(item.routeName);
               },
             ),
           )

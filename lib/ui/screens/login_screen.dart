@@ -199,6 +199,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
         SizedBox(height: 32.sp),
+
         Consumer(
           builder: (_, ref, _) {
             final loading = ref.watch(authProvider.select((s) => s.loading));

@@ -23,6 +23,7 @@ class RssClient extends StatelessWidget {
       builder: (context, _) {
         configLoading();
         return MaterialApp.router(
+        
           title: context.localization.appName,
           debugShowCheckedModeBanner: false,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -31,6 +32,7 @@ class RssClient extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeMode.light,
           builder: EasyLoading.init(),
+      
           routerConfig: AppRoutes.router,
         );
       },

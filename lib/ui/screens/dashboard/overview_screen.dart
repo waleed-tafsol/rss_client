@@ -72,13 +72,13 @@ class _OverViewScreenState extends State<OverViewScreen> {
           // ),
           SizedBox(height: 20.w),
           Container(
-            height: 642.h,
             padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AdaptiveLayoutRowColumn(
                   widthBetween: 12.w,
@@ -211,7 +211,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
 
                 SizedBox(height: 16.w),
                 Row(
-                  mainAxisSize: .max,
+                  mainAxisAlignment: .spaceBetween,
                   children: [
                     const StatusChip(status: InspectionStatus.completed),
                     SizedBox(width: 16.w),
@@ -222,9 +222,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
                 ),
 
                 SizedBox(height: 16.w),
-                Expanded(
-                  child: SizedBox(height: 337.w, child: const AppTable()),
-                ),
+                SizedBox(height: 337.sp, child: const AppTable()),
               ],
             ),
           ),
@@ -317,7 +315,7 @@ Widget _buildPendingBar() {
     children: [
       LinearProgressIndicator(
         value: 1.0,
-        minHeight: 23.w,
+        minHeight: 23.h,
         color: AppColors.darkPurple,
         borderRadius: BorderRadius.circular(8.r),
         backgroundColor: AppColors.primaryDark,
@@ -325,8 +323,8 @@ Widget _buildPendingBar() {
       SizedBox(height: 16.h),
       Row(
         children: [
-          Text("Pending:", style: AppFonts.white14w400),
-          Text("  23", style: AppFonts.white14w600),
+          Text("Pending:", style: AppFonts.black14w400),
+          Text("  23", style: AppFonts.black14w600),
         ],
       ),
     ],
@@ -347,8 +345,8 @@ Widget _buildCompeletedBar() {
       SizedBox(height: 16.w),
       Row(
         children: [
-          Text("Completed:", style: AppFonts.white14w400),
-          Text("  289", style: AppFonts.white14w600),
+          Text("Completed:", style: AppFonts.black14w400),
+          Text("  289", style: AppFonts.black14w600),
         ],
       ),
     ],

@@ -6,6 +6,7 @@ import '../ui/screens/dashboard/dashboard.dart';
 import '../ui/screens/dashboard/overview_screen.dart';
 import '../ui/screens/dashboard/project_detail.dart';
 import '../ui/screens/dashboard/project_management.dart';
+import '../ui/screens/dashboard/properties.dart';
 import '../ui/screens/dashboard/property_creation.dart';
 import '../ui/screens/dashboard/property_detail.dart';
 import '../ui/screens/dashboard/settings.dart';
@@ -43,6 +44,11 @@ class AppRoutes {
             path: OverViewScreen.routeName,
             name: OverViewScreen.routeName,
             builder: (_, _) => const OverViewScreen(),
+          ),
+          GoRoute(
+            path: Properties.routeName,
+            name: Properties.routeName,
+            builder: (_, _) => const Properties(),
           ),
           GoRoute(
             path: ProjectManagement.routeName,

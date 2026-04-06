@@ -13,7 +13,7 @@ enum CrudType {
 
 enum InspectionStatus { inProgress, upcoming, completed }
 
-enum PropertyDetailFilter { inspectionChecklist, modulesOverview, costSummary }
+enum PropertyDetailFilter { modulesOverview, costSummary }
 
 enum SettingsType { profile, password }
 

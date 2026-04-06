@@ -5,7 +5,6 @@ import '../../../utils/adaptive_layout_row_column.dart';
 import '../../../utils/context_utils.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
-import '../../widgets/property_detail_table.dart';
 import '../../widgets/status_chip.dart';
 import '../../../utils/enums.dart';
 import '../../../utils/inspection_status.dart';
@@ -16,7 +15,7 @@ class PropertyDetail extends StatelessWidget {
   static const String routeName = '/property-detail';
   PropertyDetail({super.key});
   final ValueNotifier<PropertyDetailFilter> selectedFilter = ValueNotifier(
-    PropertyDetailFilter.inspectionChecklist,
+    PropertyDetailFilter.modulesOverview,
   );
 
   List<CostSummaryData> costSummaryDataList = [
@@ -56,16 +55,6 @@ class PropertyDetail extends StatelessWidget {
       progress: 1.0,
       status: InspectionStatus.completed,
     ),
-  ];
-
-  List<String> subfilters = ["Externals", "Internals", "Energy"];
-  List<String> filters = [
-    "Stock",
-    "Attributes",
-    "Windows",
-    "D&M Survey",
-    "Repairs",
-    "HHSRS",
   ];
 
   @override
@@ -132,30 +121,15 @@ class PropertyDetail extends StatelessWidget {
             ),
           ),
           SizedBox(height: 20.sp),
-        AdaptiveLayoutRowColumn(
-            widthBetween: 20.w,
-            heightBetween: 20.sp,
-            expandedWidget: context.isLandscape ? true : false,
-            children: [
-              _buildTenantdetail(
-                title: "Tenant Details",
-                name: "George Michael",
-                email: "michael@gmail.com",
-                phone: "+1 234 567 890",
-                imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-                context: context,
-              ),
-
-              _buildTenantdetail(
-                title: "Assigned Surveyor",
-                name: "Michael Smith",
-                email: "michael@gmail.com",
-                phone: "+1 234 567 890",
-                imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-                context: context,
-              ),
-            ],
-          ),  SizedBox(height: 20.sp),
+          _buildTenantdetail(
+            title: "Assigned Surveyor",
+            name: "Michael Smith",
+            email: "michael@gmail.com",
+            phone: "+1 234 567 890",
+            imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
+            context: context,
+          ),
+          SizedBox(height: 20.sp),
           Container(
             padding: .all(16.w),
             decoration: BoxDecoration(
@@ -165,9 +139,9 @@ class PropertyDetail extends StatelessWidget {
             child: Column(
               children: [
                 // In your widget tree
-                 AdaptiveLayoutRowColumn(
+                AdaptiveLayoutRowColumn(
                   alignment: .spaceBetween,
-                
+
                   children: [
                     ValueListenableBuilder<PropertyDetailFilter>(
                       valueListenable: selectedFilter,
@@ -246,82 +220,6 @@ class PropertyDetail extends StatelessWidget {
                   valueListenable: selectedFilter,
                   builder: (context, current, _) {
                     if (selectedFilter.value ==
-                        PropertyDetailFilter.inspectionChecklist) {
-                      return Column(
-                        children: List.generate(filters.length, (index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: ExpansionTile(
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(color: Colors.transparent),
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-
-                              tilePadding: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 12.sp,
-                              ),
-                              collapsedBackgroundColor: AppColors.fillColor,
-                              backgroundColor: AppColors.fillColor,
-                              title: Row(
-                                children: [
-                                  Text(
-                                    filters[index],
-                                    style: AppFonts.black16w500,
-                                  ),
-                                  SizedBox(width: 8.w),
-
-                                  Icon(
-                                    TablerIcons.pencil,
-                                    size: 16.sp,
-                                    color: AppColors.textBlack,
-                                  ),
-                                ],
-                              ),
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: List.generate(
-                                      subfilters.length,
-                                      (index) => Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 16.0,
-                                        ),
-                                        child: ExpansionTile(
-                                          tilePadding: EdgeInsets.symmetric(
-                                            horizontal: 16.w,
-                                            vertical: 12.sp,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            side: const BorderSide(
-                                              color: Colors.transparent,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              8.r,
-                                            ),
-                                          ),
-                                          collapsedBackgroundColor:
-                                              AppColors.white,
-                                          backgroundColor: AppColors.white,
-                                          title: Text(
-                                            subfilters[index],
-                                            style: AppFonts.black16w500,
-                                          ),
-                                          children: const [
-                                            PropertyDetailItemsTable(),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      );
-                    } else if (selectedFilter.value ==
                         PropertyDetailFilter.modulesOverview) {
                       return MasonryGridView.count(
                         crossAxisCount: 2,
@@ -421,7 +319,7 @@ class PropertyDetail extends StatelessWidget {
     );
   }
 
- Widget _buildTenantdetail({
+  Widget _buildTenantdetail({
     required String title,
     required String name,
     required String email,
@@ -430,7 +328,7 @@ class PropertyDetail extends StatelessWidget {
     required BuildContext context,
   }) {
     return Container(
-      padding:  EdgeInsets.all(16.sp),
+      padding: EdgeInsets.all(16.sp),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.r),
         color: AppColors.white,
@@ -441,16 +339,18 @@ class PropertyDetail extends StatelessWidget {
             : CrossAxisAlignment.center,
         children: [
           Text(title, style: AppFonts.black18w500),
-           SizedBox(height: 16.sp),
+          SizedBox(height: 16.sp),
           AdaptiveLayoutRowColumn(
             heightBetween: 16.sp,
             widthBetween: 16.w,
 
             children: [
-               CircleAvatar(
+              CircleAvatar(
                 radius: 32.r,
                 backgroundColor: AppColors.lightGrey1,
-                backgroundImage:const NetworkImage('https://picsum.photos/400/400'),
+                backgroundImage: const NetworkImage(
+                  'https://picsum.photos/400/400',
+                ),
               ),
 
               Column(
@@ -459,7 +359,7 @@ class PropertyDetail extends StatelessWidget {
                     : CrossAxisAlignment.center,
                 children: [
                   Text(name, style: AppFonts.black18w500),
-                   SizedBox(height: 8.w),
+                  SizedBox(height: 8.w),
                   AdaptiveLayoutRowColumn(
                     widthBetween: 12.w,
                     heightBetween: 12.w,
@@ -490,7 +390,7 @@ class PropertyDetail extends StatelessWidget {
                             size: 16,
                             color: AppColors.textBlack,
                           ),
-                           SizedBox(width: 10.w),
+                          SizedBox(width: 10.w),
                           Text(phone, style: AppFonts.black14w400),
                         ],
                       ),
@@ -498,19 +398,13 @@ class PropertyDetail extends StatelessWidget {
                   ),
                 ],
               ),
-              context.isLandscape ? const Spacer() : const SizedBox.shrink(),
-              IconButton(
-                icon: const Icon(TablerIcons.arrowUpRight),
-                iconSize: 24.sp,
-                color: AppColors.textBlack,
-                onPressed: () {},
-              ),
             ],
           ),
         ],
       ),
     );
   }
+
   Widget _buildDetailColumn(String title, String value) {
     return SizedBox(
       width: 207.w,

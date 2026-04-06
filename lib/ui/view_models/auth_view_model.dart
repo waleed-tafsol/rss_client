@@ -19,7 +19,7 @@ class AuthViewModel extends BaseViewModel<AuthState> {
         request: LoginRequest(
           email: email,
           password: password,
-          role: UserType.client,
+          role: UserType.admin,
         ),
       );
       state = state.copyWith(loading: false, user: user);

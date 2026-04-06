@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../utils/enums.dart';
 import '../resources/app_fonts.dart';
 import '../../utils/inspection_status.dart';
@@ -11,17 +12,17 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      padding: const EdgeInsets.only(left: 5, top: 0, bottom: 0, right: 0),
-      avatarBoxConstraints: const BoxConstraints(maxHeight: 6, maxWidth: 6),
+      padding: EdgeInsets.only(left: 5.w, top: 0, bottom: 0),
+      avatarBoxConstraints: BoxConstraints(maxHeight: 6.w, maxWidth: 6.w),
       avatar: Container(
-        width: 6,
-        height: 6,
+        width: 6.w,
+        height: 6.w,
         decoration: BoxDecoration(
           color: status.fontColor,
           shape: BoxShape.circle,
         ),
       ),
-      labelPadding: const EdgeInsets.only(left: 4, right: 5, top: 0, bottom: 0),
+      labelPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0),
       label: Text(
         title ?? status.label,
         style: AppFonts.black12w400.copyWith(color: status.fontColor),
