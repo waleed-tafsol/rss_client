@@ -1,18 +1,16 @@
-
 import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
-
-
 class SettingsViewModel extends BaseViewModel {
-  // SettingsViewModel._() : super(SettingsType.profile);
-  SettingsType settingsType = SettingsType.profile;
+  SettingsType _settingsType = SettingsType.profile;
+
+  SettingsType get settingsType => _settingsType;
 
   void updateSettingsType(SettingsType newSettingsType) {
-    if (settingsType == newSettingsType) {
+    if (_settingsType == newSettingsType) {
       return;
     }
-    settingsType = newSettingsType;
+    _settingsType = newSettingsType;
     notifyListeners();
   }
 }

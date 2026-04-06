@@ -3,26 +3,25 @@ import 'package:flutter/material.dart';
 import '../../services/locator.dart';
 import 'base_view_model.dart';
 
-// final themeProvider = NotifierProvider(() => ThemeViewModel._());
-
 class ThemeViewModel extends BaseViewModel {
-  ThemeMode themeMode = ThemeMode.light;
+  ThemeMode _themeMode = ThemeMode.light;
+
+  ThemeMode get themeMode => _themeMode;
 
   @override
   void init() async {
     super.init();
     final theme = await locator<StorageService>().getTheme();
     if (theme != null) {
-      themeMode = theme;
+      _themeMode = theme;
       notifyListeners();
     }
   }
 
   void toggleTheme() {
-    final newTheme = themeMode == ThemeMode.light
+    _themeMode = _themeMode == ThemeMode.light
         ? ThemeMode.dark
         : ThemeMode.light;
-    themeMode = newTheme;
     notifyListeners();
   }
 }

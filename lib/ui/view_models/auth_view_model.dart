@@ -8,27 +8,44 @@ import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
 class AuthViewModel extends BaseViewModel {
-  bool loading = false;
-  User? user;
-  AuthView? authView = AuthView.login;
-  String? resetToken;
+  bool _loading = false;
+  User? _user;
+  AuthView? _authView = AuthView.login;
+  String? _resetToken;
+
+  // Getters
+  bool get loading => _loading;
+  User? get user => _user;
+  AuthView? get authView => _authView;
+  String? get resetToken => _resetToken;
+  
+  bool get isLoggedIn => _user != null;
+  bool get isLoginView => _authView == AuthView.login;
+  bool get isForgotPasswordView => _authView == AuthView.forgotPassword;
+  bool get isOtpView => _authView == AuthView.otp;
+  bool get isResetPasswordView => _authView == AuthView.resetPassword;
+
+  // Convenience Getters
+  String get userName => _user?.name ?? 'N/A';
+  String get userEmail => _user?.email ?? 'N/A';
 
   void setLoading(bool value) {
-    loading = value;
+    _loading = value;
     notifyListeners();
   }
 
   void setUser(User? user) {
-    user = user;
-  }
-
-  void setAuthView(AuthView view) {
-    authView = view;
+    _user = user;
     notifyListeners();
   }
 
-  void setRestToken(String? token) {
-    resetToken = token;
+  void setAuthView(AuthView view) {
+    _authView = view;
+    notifyListeners();
+  }
+
+  void setResetToken(String? token) {
+    _resetToken = token;
     notifyListeners();
   }
 
@@ -43,21 +60,18 @@ class AuthViewModel extends BaseViewModel {
           role: UserType.admin,
         ),
       );
-      loading = false;
-      this.user = user;
+      _loading = false;
+      _user = user;
       notifyListeners();
-
     });
   }
 
   Future<void> checkAuthentication() async {
     return await runSafely(() async {
       final user = await locator<StorageService>().getUser();
-      this.user = user;
-      loading = false;
+      _user = user;
+      _loading = false;
       notifyListeners();
-      // setUser(user);
-      // setLoading(false);
     });
   }
 
@@ -65,6 +79,8 @@ class AuthViewModel extends BaseViewModel {
     return await runSafely(() async {
       EasyLoading.show(status: 'Logging out...');
       await locator<AuthService>().logout();
+      _user = null;
+      notifyListeners();
       EasyLoading.dismiss();
     });
   }
@@ -73,32 +89,22 @@ class AuthViewModel extends BaseViewModel {
     return await runSafely(() async {
       setLoading(true);
       await locator<AuthService>().forgotPassword(email: email);
-      loading = false;
-      authView = AuthView.otp;
+      _loading = false;
+      _authView = AuthView.otp;
       notifyListeners();
-      // setLoading(false);
-      // setAuthView(AuthView.otp);
-      // state = state.copyWith(loading: false, authView: AuthView.otp);
     });
   }
 
   Future<void> verifyOtp({required String email, required String otp}) async {
     return await runSafely(() async {
-      //  state = state.copyWith(loading: true);
       setLoading(true);
       final resetToken = await locator<AuthService>().verifyOtp(
         email: email,
         otp: otp,
       );
-      authView = AuthView.otp;
-      loading = false;
-      this.resetToken = resetToken;
-
-      // state = state.copyWith(
-      //   loading: false,
-      //   authView: AuthView.resetPassword,
-      //   resetToken: resetToken,
-      // );
+      _authView = AuthView.otp;
+      _loading = false;
+      _resetToken = resetToken;
       EasyLoading.showSuccess('Email verified!');
       notifyListeners();
     });
@@ -109,27 +115,20 @@ class AuthViewModel extends BaseViewModel {
     required String passwordConfirmation,
   }) async {
     return await runSafely(() async {
-      //  final resetToken = state.resetToken;
-      if (resetToken == null) {
+      if (_resetToken == null) {
         throw const AppException(
           'Resend token not found, please send otp again!',
         );
       }
       setLoading(true);
-      // state = state.copyWith(loading: true);
       await locator<AuthService>().resetPassword(
-        resetToken: resetToken ?? "",
+        resetToken: _resetToken ?? "",
         password: password,
         passwordConfirmation: passwordConfirmation,
       );
-      loading = false;
-      authView = AuthView.login;
-      resetToken = null;
-      // state = state.copyWith(
-      //   loading: false,
-      //   authView: AuthView.login,
-      //   resetToken: null,
-      // );
+      _loading = false;
+      _authView = AuthView.login;
+      _resetToken = null;
       EasyLoading.showSuccess('Password reset successfully!');
       notifyListeners();
     });
@@ -137,33 +136,9 @@ class AuthViewModel extends BaseViewModel {
 
   @override
   void handleError(String message) {
-    loading = false;
-    //  state = state.copyWith(loading: false);
+    _loading = false;
     EasyLoading.dismiss();
     super.handleError(message);
     notifyListeners();
   }
 }
-
-// class AuthState {
-//   const AuthState({
-//     this.loading = false,
-//     this.user,
-//     this.authView = AuthView.login,
-//     this.resetToken,
-//   });
-
-//   AuthState copyWith({
-//     bool? loading,
-//     User? user,
-//     AuthView? authView,
-//     String? resetToken,
-//   }) {
-//     return AuthState(
-//       loading: loading ?? this.loading,
-//       user: user ?? this.user,
-//       authView: authView ?? this.authView,
-//       resetToken: resetToken,
-//     );
-//   }
-// }
