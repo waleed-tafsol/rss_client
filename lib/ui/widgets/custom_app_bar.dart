@@ -10,6 +10,7 @@ import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 import '../../utils/context_utils.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
+import '../screens/dashboard/notification.dart';
 import '../screens/login_screen.dart';
 import '../view_models/app_view_model.dart';
 import '../view_models/auth_view_model.dart';
@@ -201,8 +202,17 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
             children: [
               Text('Notifications', style: AppFonts.black18w600),
               const Spacer(),
-              Text('View All', style: AppFonts.black14w400),
-              Icon(TablerIcons.arrowUpRight, size: 24.sp),
+              GestureDetector(
+                onTap: () {
+                  context.go(Notifications.routeName);
+                },
+                child: Row(
+                  children: [
+                    Text('View All', style: AppFonts.black14w400),
+                    Icon(TablerIcons.arrowUpRight, size: 24.sp),
+                  ],
+                ),
+              ),
             ],
           ),
           SizedBox(height: 16.sp),

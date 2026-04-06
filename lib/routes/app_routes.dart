@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../services/locator.dart';
 import '../ui/screens/dashboard/dashboard.dart';
+import '../ui/screens/dashboard/notification.dart';
 import '../ui/screens/dashboard/overview_screen.dart';
 import '../ui/screens/dashboard/project_detail.dart';
 import '../ui/screens/dashboard/project_management.dart';
@@ -72,6 +73,7 @@ class AppRoutes {
                   ),
                 ],
               ),
+             
             ],
           ),
           GoRoute(
@@ -84,6 +86,12 @@ class AppRoutes {
             name: Settings.routeName,
             builder: (_, _) => const Settings(),
           ),
+           GoRoute(
+                path: Notifications.routeName,
+                name: Notifications.routeName,
+                builder: (_, _) => const Notifications(),
+              ),
+      
         ],
       ),
     ],
