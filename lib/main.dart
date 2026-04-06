@@ -4,17 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'rss_client.dart';
 import 'services/locator.dart';
 import 'ui/resources/app_colors.dart';
+import 'ui/view_models/app_view_model.dart';
+import 'ui/view_models/auth_view_model.dart';
+import 'ui/view_models/settings_view_model.dart';
+import 'ui/view_models/theme_view_model.dart';
+import 'ui/view_models/crud_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _initializeFonts();
   await initializeServices();
-  usePathUrlStrategy();
-  runApp(const ProviderScope(child: RssClient()));
+  // usePathUrlStrategy(); // If you need this, ensure it's imported correctly
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppViewModel()),
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => ThemeViewModel()..init()),
+        ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+        ChangeNotifierProvider(create: (_) => CrudViewModel()),
+      ],
+      child: const RssClient(),
+    ),
+  );
 }
 
 Future<void> _initializeFonts() async {

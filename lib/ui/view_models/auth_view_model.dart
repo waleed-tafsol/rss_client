@@ -46,7 +46,7 @@ class AuthViewModel extends BaseViewModel {
       loading = false;
       this.user = user;
       notifyListeners();
-     
+
     });
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../../utils/enums.dart';
@@ -19,12 +19,11 @@ class Settings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (_, ref, _) {
-        final settingsType = ref.watch(settingsProvider);
+    return Consumer<SettingsViewModel>(
+      builder: (_, viewModel, __) {
+        final settingsType = viewModel.settingsType;
         return Column(
-          crossAxisAlignment: .start,
-          spacing: 20.sp,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Wrap(
               spacing: 12.w,
@@ -34,9 +33,7 @@ class Settings extends StatelessWidget {
                 return ChoiceChip(
                   selected: isSelected,
                   onSelected: (_) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .updateSettingsType(type);
+                    viewModel.updateSettingsType(type);
                   },
                   showCheckmark: false,
                   backgroundColor: isSelected ? null : AppColors.white,
@@ -54,6 +51,7 @@ class Settings extends StatelessWidget {
                 );
               }),
             ),
+            SizedBox(height: 20.sp),
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16.w),
@@ -71,21 +69,24 @@ class Settings extends StatelessWidget {
 
   Widget _buildPasswordView() {
     return Column(
-      crossAxisAlignment: .start,
-      spacing: 16.sp,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Update Password', style: AppFonts.black18w500),
+        SizedBox(height: 16.sp),
         const AppTextField(title: 'Current Password'),
+        SizedBox(height: 16.sp),
         const AppTextField(title: 'New Password'),
+        SizedBox(height: 16.sp),
         const AppTextField(title: 'Confirm New Password'),
+        SizedBox(height: 16.sp),
         Row(
-          spacing: 12.sp,
-          children: const [
-            AppGradientButton(
+          children: [
+            const AppGradientButton(
               title: 'Update Password',
               icon: TablerIcons.check,
             ),
-            AppSecondaryButton(title: 'Cancel', icon: TablerIcons.x),
+            SizedBox(width: 12.sp),
+            const AppSecondaryButton(title: 'Cancel', icon: TablerIcons.x),
           ],
         ),
       ],

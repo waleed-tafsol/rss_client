@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
+import 'package:provider/provider.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../utils/context_utils.dart';
@@ -19,16 +19,16 @@ import '../widgets/app_loader.dart';
 import '../widgets/app_text_field.dart';
 import 'dashboard/overview_screen.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends StatefulWidget {
   static const String routeName = '/login';
 
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final ValueNotifier<bool> _rememberMe = ValueNotifier<bool>(true);
   final _hidePassword = ValueNotifier(true);
   final _emailController = TextEditingController();
@@ -42,9 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_loginFormKey.currentState!.validate()) {
       return;
     }
-    ref
-        .read(authProvider.notifier)
-        .login(
+    context.read<AuthViewModel>().login(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
@@ -54,32 +52,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_loginFormKey.currentState!.validate()) {
       return;
     }
-    ref
-        .read(authProvider.notifier)
-        .forgotPassword(email: _emailController.text.trim());
+    context.read<AuthViewModel>().forgotPassword(email: _emailController.text.trim());
   }
 
   void _onOtpSubmitTap() {
     if (!_loginFormKey.currentState!.validate()) {
       return;
     }
-    ref
-        .read(authProvider.notifier)
-        .verifyOtp(
+    context.read<AuthViewModel>().verifyOtp(
           email: _emailController.text.trim(),
           otp: _pinController.text.trim(),
         );
   }
 
-  Future<void> _listener(AuthState? prev, AuthState next) async {
-    if (next.user != null) {
+  void _onResetPasswordSubmitTap() {
+    if (!_loginFormKey.currentState!.validate()) {
+      return;
+    }
+    context.read<AuthViewModel>().resetPassword(
+          password: _newPasswordController.text.trim(),
+          passwordConfirmation: _confirmPassController.text.trim(),
+        );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authViewModel = context.read<AuthViewModel>();
+      authViewModel.addListener(_authListener);
+    });
+  }
+
+  void _authListener() {
+    final authViewModel = context.read<AuthViewModel>();
+    if (authViewModel.user != null) {
       context.go(OverViewScreen.routeName);
     }
-    log('AUTH VIEW: ${next.authView}');
+    log('AUTH VIEW: ${authViewModel.authView}');
   }
 
   @override
   void dispose() {
+    // context.read<AuthViewModel>().removeListener(_authListener); // This can cause issues if context is not valid anymore
     _rememberMe.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -92,7 +107,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(authProvider, _listener);
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(context.isLandscape ? 16.w : 20.sp),
@@ -118,14 +132,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildBody(BuildContext context) {
     return Form(
       key: _loginFormKey,
-      child: Consumer(
-        builder: (_, ref, _) {
-          final authView = ref.watch(authProvider.select((s) => s.authView));
+      child: Selector<AuthViewModel, AuthView?>(
+        selector: (_, vm) => vm.authView,
+        builder: (context, authView, _) {
           final child = switch (authView) {
             AuthView.login => _buildLoginView(context),
             AuthView.forgotPassword => _buildForgotPasswordView(),
             AuthView.otp => _buildOtpView(),
             AuthView.resetPassword => _buildResetPasswordView(),
+            null => _buildLoginView(context),
           };
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
@@ -149,7 +164,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       key: const ValueKey(AuthView.login),
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text("Welcome Back!", style: AppFonts.black32w600),
         SizedBox(height: 12.sp),
@@ -202,10 +217,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Text("Remember Me", style: AppFonts.primary14w400),
             const Spacer(),
             TextButton(
-              onPressed: () async {
-                ref
-                    .read(authProvider.notifier)
-                    .changeView(AuthView.forgotPassword);
+              onPressed: () {
+                context.read<AuthViewModel>().setAuthView(AuthView.forgotPassword);
               },
               child: Text(
                 "Forgot Password?",
@@ -218,10 +231,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
         SizedBox(height: 32.sp),
-
-        Consumer(
-          builder: (_, ref, _) {
-            final loading = ref.watch(authProvider.select((s) => s.loading));
+        Selector<AuthViewModel, bool>(
+          selector: (_, vm) => vm.loading,
+          builder: (context, loading, _) {
             if (loading) {
               return const AppLoader();
             }
@@ -240,11 +252,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       key: const ValueKey(AuthView.forgotPassword),
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          onPressed: () async {
-            ref.read(authProvider.notifier).changeView(AuthView.login);
+          onPressed: () {
+            context.read<AuthViewModel>().setAuthView(AuthView.login);
           },
           icon: const Icon(TablerIcons.chevronLeft),
         ),
@@ -255,9 +267,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           validator: Validators.email,
         ),
         SizedBox(height: 32.sp),
-        Consumer(
-          builder: (_, ref, _) {
-            final loading = ref.watch(authProvider.select((s) => s.loading));
+        Selector<AuthViewModel, bool>(
+          selector: (_, vm) => vm.loading,
+          builder: (context, loading, _) {
             if (loading) {
               return const AppLoader();
             }
@@ -275,12 +287,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Column _buildOtpView() {
     return Column(
       key: const ValueKey(AuthView.otp),
-      crossAxisAlignment: .start,
-      mainAxisAlignment: .center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          onPressed: () async {
-            ref.read(authProvider.notifier).changeView(AuthView.login);
+          onPressed: () {
+            context.read<AuthViewModel>().setAuthView(AuthView.login);
           },
           icon: const Icon(TablerIcons.chevronLeft),
         ),
@@ -301,9 +313,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
         SizedBox(height: 32.sp),
-        Consumer(
-          builder: (_, ref, _) {
-            final loading = ref.watch(authProvider.select((s) => s.loading));
+        Selector<AuthViewModel, bool>(
+          selector: (_, vm) => vm.loading,
+          builder: (context, loading, _) {
             if (loading) {
               return const AppLoader();
             }
@@ -320,10 +332,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Column _buildResetPasswordView() {
     return Column(
+      key: const ValueKey(AuthView.resetPassword),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          onPressed: () async {
-            ref.read(authProvider.notifier).changeView(AuthView.login);
+          onPressed: () {
+            context.read<AuthViewModel>().setAuthView(AuthView.login);
           },
           icon: const Icon(TablerIcons.chevronLeft),
         ),
@@ -332,7 +347,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           valueListenable: _hidePassword,
           builder: (context, hidePassword, _) {
             return Column(
-              spacing: 16.sp,
               children: [
                 AppTextField(
                   controller: _newPasswordController,
@@ -346,10 +360,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
+                SizedBox(height: 16.sp),
                 AppTextField(
                   controller: _confirmPassController,
                   title: 'Confirm password',
-                  validator: Validators.password,
+                  validator: (val) {
+                    if (val != _newPasswordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return Validators.password(val);
+                  },
                   hide: hidePassword,
                   suffix: IconButton(
                     onPressed: () => _hidePassword.value = !hidePassword,
@@ -363,16 +383,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           },
         ),
         SizedBox(height: 32.sp),
-        Consumer(
-          builder: (_, ref, _) {
-            final loading = ref.watch(authProvider.select((s) => s.loading));
+        Selector<AuthViewModel, bool>(
+          selector: (_, vm) => vm.loading,
+          builder: (context, loading, _) {
             if (loading) {
               return const AppLoader();
             }
             return AppGradientButton(
               title: 'Submit',
               icon: Icons.arrow_forward,
-              onTap: _onOtpSubmitTap,
+              onTap: _onResetPasswordSubmitTap,
             );
           },
         ),

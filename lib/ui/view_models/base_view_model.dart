@@ -33,12 +33,14 @@ abstract class BaseViewModel extends ChangeNotifier {
 
   @mustCallSuper
   void init() {
-    log('INITIALIZING $runtimeType', name: 'RIVERPOD');
+    log('INITIALIZING $runtimeType');
   }
 
   @mustCallSuper
+  @override
   void dispose() {
-    log('DISPOSING $runtimeType', name: 'RIVERPOD');
+    log('DISPOSING $runtimeType');
+    super.dispose();
   }
 
   @mustCallSuper
