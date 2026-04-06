@@ -6,6 +6,7 @@ import 'base_view_model.dart';
 class ThemeViewModel extends BaseViewModel {
   ThemeMode _themeMode = ThemeMode.light;
 
+
   ThemeMode get themeMode => _themeMode;
 
   @override
