@@ -33,9 +33,30 @@ class AuthService {
     }
   }
 
-  Future<void> verifyOtp({required String email, required String otp}) async {
+  Future<String?> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
     final response = await locator<AuthApi>().verifyOtp(
       VerifyOtpRequest(email: email, otp: otp),
+    );
+    if (!(response.success ?? false)) {
+      throw AppException(response.message ?? 'Something went wrong!');
+    }
+    return response!.data!.resetToken;
+  }
+
+  Future<void> resetPassword({
+    required String resetToken,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await locator<AuthApi>().resetPassword(
+      ResetPasswordRequest(
+        resetToken: resetToken,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      ),
     );
     if (!(response.success ?? false)) {
       throw AppException(response.message ?? 'Something went wrong!');

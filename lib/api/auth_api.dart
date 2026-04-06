@@ -4,6 +4,7 @@ import 'package:retrofit/http.dart';
 
 import '../models/requests/email_request.dart';
 import '../models/requests/login_request.dart';
+import '../models/requests/reset_password_request.dart';
 import '../models/requests/verify_otp_request.dart';
 import '../models/responses/auth_response.dart';
 import '../models/responses/base_response.dart';
@@ -26,4 +27,7 @@ abstract class AuthApi {
 
   @POST('/verify-otp')
   Future<VerifyOtpResponse> verifyOtp(@Body() VerifyOtpRequest request);
+
+  @POST('/reset-password')
+  Future<BaseResponse> resetPassword(@Body() ResetPasswordRequest request);
 }
