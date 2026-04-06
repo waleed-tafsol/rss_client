@@ -16,20 +16,20 @@ import '../view_models/app_view_model.dart';
 import '../view_models/auth_view_model.dart';
 import 'app_network_image.dart';
 
-class CustomAppBar extends ConsumerStatefulWidget
+class CustomAppBar extends StatefulWidget
     implements PreferredSizeWidget {
   final SidebarXController controller;
 
   const CustomAppBar({super.key, required this.controller});
 
   @override
-  ConsumerState<CustomAppBar> createState() => _CustomAppBarState();
+State<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
   Size get preferredSize => Size(double.infinity, 70.sp);
 }
 
-class _CustomAppBarState extends ConsumerState<CustomAppBar> {
+class _CustomAppBarState extends State<CustomAppBar> {
   final _notificationMenuController = MenuController();
   final _appMenuController = MenuController();
 
@@ -123,7 +123,7 @@ class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   }
 
   Consumer _buildAvatar(BuildContext context) {
-    return Consumer(
+    return Consumer<AuthViewModel>(
       builder: (_, ref, _) {
         return MenuAnchor(
           controller: _appMenuController,

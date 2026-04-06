@@ -4,20 +4,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 
 import '../../exceptions/app_exception.dart';
 
-abstract class BaseViewModel<S> extends Notifier<S> {
-  final S initialState;
-  BaseViewModel(this.initialState);
+abstract class BaseViewModel extends ChangeNotifier {
 
-  @override
-  S build() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => init());
-    ref.onDispose(dispose);
-    return initialState;
-  }
+
+
 
   Future<T?> runSafely<T>(AsyncValueGetter<T> action) async {
     try {

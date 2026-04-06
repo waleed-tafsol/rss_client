@@ -1,23 +1,21 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'base_view_model.dart';
 
-final appProvider = NotifierProvider(() => AppViewModel._());
-
-class AppViewModel extends BaseViewModel<AppState> {
-  AppViewModel._() : super(const AppState());
+class AppViewModel extends BaseViewModel {
+  bool isLoggedIn = false;
 
   void setIsLoggedIn(bool value) {
-    state = state.copyWith(isLoggedIn: value);
+    isLoggedIn = value;
+    notifyListeners();
   }
 }
 
-class AppState {
-  final bool isLoggedIn;
+// class AppState {
+//   final bool isLoggedIn;
 
-  const AppState({this.isLoggedIn = false});
+//   const AppState({this.isLoggedIn = false});
 
-  AppState copyWith({bool? isLoggedIn}) {
-    return AppState(isLoggedIn: isLoggedIn ?? this.isLoggedIn);
-  }
-}
+//   AppState copyWith({bool? isLoggedIn}) {
+//     return AppState(isLoggedIn: isLoggedIn ?? this.isLoggedIn);
+//   }
+// }

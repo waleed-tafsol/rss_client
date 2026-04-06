@@ -11,23 +11,30 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Chip(
-      padding: EdgeInsets.only(left: 5.w, top: 0, bottom: 0),
-      avatarBoxConstraints: BoxConstraints(maxHeight: 6.w, maxWidth: 6.w),
-      avatar: Container(
-        width: 6.w,
-        height: 6.w,
-        decoration: BoxDecoration(
-          color: status.fontColor,
-          shape: BoxShape.circle,
-        ),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.w),
+      decoration: BoxDecoration(
+        color: status.backgroundColor,
+        borderRadius: BorderRadius.circular(16.r),
       ),
-      labelPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0),
-      label: Text(
-        title ?? status.label,
-        style: AppFonts.black12w400.copyWith(color: status.fontColor),
+      child: Row(
+        mainAxisSize: .min,
+        children: [
+          Container(
+            width: 6.w,
+            height: 6.sp,
+            decoration: BoxDecoration(
+              color: status.fontColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            status.label,
+            style: AppFonts.black12w400.copyWith(color: status.fontColor),
+          ),
+        ],
       ),
-      backgroundColor: status.backgroundColor,
     );
   }
 }

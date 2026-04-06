@@ -1,5 +1,4 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../exceptions/app_exception.dart';
 import '../../models/requests/login_request.dart';
@@ -8,14 +7,35 @@ import '../../services/locator.dart';
 import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
-final authProvider = NotifierProvider(() => AuthViewModel());
+class AuthViewModel extends BaseViewModel {
+  bool loading = false;
+  User? user;
+  AuthView? authView = AuthView.login;
+  String? resetToken;
 
-class AuthViewModel extends BaseViewModel<AuthState> {
-  AuthViewModel() : super(const AuthState());
+  void setLoading(bool value) {
+    loading = value;
+    notifyListeners();
+  }
+
+  void setUser(User? user) {
+    user = user;
+  }
+
+  void setAuthView(AuthView view) {
+    authView = view;
+    notifyListeners();
+  }
+
+  void setRestToken(String? token) {
+    resetToken = token;
+    notifyListeners();
+  }
 
   Future<void> login({required String email, required String password}) async {
     return await runSafely(() async {
-      state = state.copyWith(loading: true);
+      setLoading(true);
+
       final user = await locator<AuthService>().login(
         request: LoginRequest(
           email: email,
@@ -23,14 +43,21 @@ class AuthViewModel extends BaseViewModel<AuthState> {
           role: UserType.admin,
         ),
       );
-      state = state.copyWith(loading: false, user: user);
+      loading = false;
+      this.user = user;
+      notifyListeners();
+     
     });
   }
 
   Future<void> checkAuthentication() async {
     return await runSafely(() async {
       final user = await locator<StorageService>().getUser();
-      state = state.copyWith(loading: false, user: user);
+      this.user = user;
+      loading = false;
+      notifyListeners();
+      // setUser(user);
+      // setLoading(false);
     });
   }
 
@@ -38,32 +65,42 @@ class AuthViewModel extends BaseViewModel<AuthState> {
     return await runSafely(() async {
       EasyLoading.show(status: 'Logging out...');
       await locator<AuthService>().logout();
-      state = const AuthState();
       EasyLoading.dismiss();
     });
   }
 
   Future<void> forgotPassword({required String email}) async {
     return await runSafely(() async {
-      state = state.copyWith(loading: true);
+      setLoading(true);
       await locator<AuthService>().forgotPassword(email: email);
-      state = state.copyWith(loading: false, authView: AuthView.otp);
+      loading = false;
+      authView = AuthView.otp;
+      notifyListeners();
+      // setLoading(false);
+      // setAuthView(AuthView.otp);
+      // state = state.copyWith(loading: false, authView: AuthView.otp);
     });
   }
 
   Future<void> verifyOtp({required String email, required String otp}) async {
     return await runSafely(() async {
-      state = state.copyWith(loading: true);
+      //  state = state.copyWith(loading: true);
+      setLoading(true);
       final resetToken = await locator<AuthService>().verifyOtp(
         email: email,
         otp: otp,
       );
-      state = state.copyWith(
-        loading: false,
-        authView: AuthView.resetPassword,
-        resetToken: resetToken,
-      );
+      authView = AuthView.otp;
+      loading = false;
+      this.resetToken = resetToken;
+
+      // state = state.copyWith(
+      //   loading: false,
+      //   authView: AuthView.resetPassword,
+      //   resetToken: resetToken,
+      // );
       EasyLoading.showSuccess('Email verified!');
+      notifyListeners();
     });
   }
 
@@ -72,63 +109,61 @@ class AuthViewModel extends BaseViewModel<AuthState> {
     required String passwordConfirmation,
   }) async {
     return await runSafely(() async {
-      final resetToken = state.resetToken;
+      //  final resetToken = state.resetToken;
       if (resetToken == null) {
         throw const AppException(
           'Resend token not found, please send otp again!',
         );
       }
-      state = state.copyWith(loading: true);
+      setLoading(true);
+      // state = state.copyWith(loading: true);
       await locator<AuthService>().resetPassword(
-        resetToken: resetToken,
+        resetToken: resetToken ?? "",
         password: password,
         passwordConfirmation: passwordConfirmation,
       );
-      state = state.copyWith(
-        loading: false,
-        authView: AuthView.login,
-        resetToken: null,
-      );
+      loading = false;
+      authView = AuthView.login;
+      resetToken = null;
+      // state = state.copyWith(
+      //   loading: false,
+      //   authView: AuthView.login,
+      //   resetToken: null,
+      // );
       EasyLoading.showSuccess('Password reset successfully!');
+      notifyListeners();
     });
-  }
-
-  void changeView(AuthView authView) async {
-    state = state.copyWith(authView: authView);
   }
 
   @override
   void handleError(String message) {
-    state = state.copyWith(loading: false);
+    loading = false;
+    //  state = state.copyWith(loading: false);
     EasyLoading.dismiss();
     super.handleError(message);
+    notifyListeners();
   }
 }
 
-class AuthState {
-  final bool loading;
-  final User? user;
-  final AuthView authView;
-  final String? resetToken;
+// class AuthState {
+//   const AuthState({
+//     this.loading = false,
+//     this.user,
+//     this.authView = AuthView.login,
+//     this.resetToken,
+//   });
 
-  const AuthState({
-    this.loading = false,
-    this.user,
-    this.authView = AuthView.login,
-    this.resetToken,
-  });
-
-  AuthState copyWith({
-    bool? loading,
-    User? user,
-    AuthView? authView,
-    String? resetToken,
-  }) {
-    return AuthState(
-      loading: loading ?? this.loading,
-      user: user ?? this.user,
-      authView: authView ?? this.authView,
-      resetToken: resetToken,
-    );
-  }
-}
+//   AuthState copyWith({
+//     bool? loading,
+//     User? user,
+//     AuthView? authView,
+//     String? resetToken,
+//   }) {
+//     return AuthState(
+//       loading: loading ?? this.loading,
+//       user: user ?? this.user,
+//       authView: authView ?? this.authView,
+//       resetToken: resetToken,
+//     );
+//   }
+// }
