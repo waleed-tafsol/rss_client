@@ -14,6 +14,7 @@ import '../screens/dashboard/client_update.dart';
 import '../screens/dashboard/surveryor_update.dart';
 import '../screens/dashboard/surveyor_details.dart';
 import '../view_models/user_management_view_model.dart';
+import 'status_chip.dart';
 
 class AppTable extends StatelessWidget {
   const AppTable({super.key});
@@ -44,19 +45,19 @@ class AppTable extends StatelessWidget {
     final double width;
     switch (index) {
       case 0:
-        width = 180.w;
+        width = 120.w;
         break;
       case 1:
-        width = 180.w;
+        width = 150.w;
         break;
       case 2:
-        width = 170.w;
+        width = 269.w;
         break;
       case 3:
-        width = 180.w;
+        width = 183.w;
         break;
       case 4:
-        width = 140.w;
+        width = 130.w;
         break;
       case 5:
         width = 120.w;
@@ -106,6 +107,17 @@ class AppTable extends StatelessWidget {
 
     switch (vicinity.column) {
       case 0:
+        child = Text(data['project'], style: AppFonts.black14w400);
+        break;
+      case 1:
+        child = Text(data['uprn'].toString(), style: AppFonts.black14w400);
+
+        break;
+      case 2:
+        child = Text(data['address'], style: AppFonts.black14w400);
+
+        break;
+      case 3:
         child = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -117,27 +129,16 @@ class AppTable extends StatelessWidget {
               ),
             ),
             SizedBox(width: 12.w),
-            Text(data['name'], style: AppFonts.black14w500),
+            Flexible(child: Text(data['name'], style: AppFonts.black14w500)),
           ],
         );
-        break;
-      case 1:
-        child = Text(data['email'], style: AppFonts.black14w400);
-        break;
-      case 2:
-        child = Text(
-          data['inspections'].toString(),
-          style: AppFonts.black14w400,
-        );
-        break;
-      case 3:
-        child = Text(data['project'], style: AppFonts.black14w400);
+
         break;
       case 4:
         child = Text(data['date'], style: AppFonts.black14w400);
         break;
       case 5:
-        child = _buildStatus(data['status']);
+        child = StatusChip(status: data['status']);
         break;
       case 6:
         final controller = MenuController();
@@ -210,124 +211,120 @@ class AppTable extends StatelessWidget {
     );
   }
 
-  Widget _buildStatus(String status) {
-    final bool isActive = status == 'Active';
-    final Color color = isActive ? const Color(0xFF4CAF50) : AppColors.grey;
-    return  Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 6.w,
-          height: 6.w,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        SizedBox(width: 6.w),
-        Text(
-          status,
-          style: AppFonts.black14w600.copyWith(color: color, fontSize: 12.sp),
-        ),
-      ],
-    );
- }
-
   static const List<String> _headerLabels = [
-    'Name',
-    'Email',
-    'Inspections Completed',
-    'Assigned Project',
-    'Creation Date',
+    'Project Name',
+    'UPRN',
+    'Address',
+    'Assigned Surveyor',
+    'Date',
     'Status',
     '',
   ];
 
   static const List<Map<String, dynamic>> _dummyData = [
     {
-      'name': 'Maeby Funke',
-      'email': 'maeby@gmail.com',
-      'inspections': 75,
       'project': 'Wandsworth',
-      'date': 'Dec 03, 2022',
-      'status': 'Active',
+      'uprn': '71045',
+      'address': '456 Elm Avenue, Westview',
+      'name': 'Maeby Funke',
+      'date': 'Dec 03, 2023',
+      'status': InspectionStatus.inProgress,
     },
     {
+      'project': 'Greenwich',
+      'uprn': '28944',
+      'address': '789 Oak Street, Hillside',
       'name': 'Bob Loblaw',
-      'email': 'bob@gmail.com',
-      'inspections': 12,
-      'project': 'Greenwich',
-      'date': 'Jan 21, 2023',
-      'status': 'Active',
+      'date': 'Jan 27, 2024',
+      'status': InspectionStatus.inProgress,
     },
     {
-      'name': 'Maeby Funke',
-      'email': 'maeby@gmail.com',
-      'inspections': 63,
       'project': 'LBHF',
-      'date': 'Jul 16, 2022',
-      'status': 'Active',
-    },
-    {
-      'name': 'George Michael',
-      'email': 'george@gmail.com',
-      'inspections': 31,
-      'project': 'Guildford',
-      'date': 'Aug 08, 2023',
-      'status': 'Active',
-    },
-    {
+      'uprn': '16021',
+      'address': '101 Pine Lane, Valleywood',
       'name': 'Maeby Funke',
-      'email': 'maeby@gmail.com',
-      'inspections': 31,
-      'project': '--',
-      'date': 'Nov 29, 2022',
-      'status': 'Active',
+      'date': 'Nov 18, 2023',
+      'status': InspectionStatus.upcoming,
     },
     {
-      'name': 'Michael Bluth',
-      'email': 'michael@gmail.com',
-      'inspections': 12,
       'project': 'Guildford',
-      'date': 'Feb 14, 2023',
-      'status': 'Active',
+      'uprn': '46508',
+      'address': '222 Maple Drive, Brookside',
+      'name': 'George Michael',
+      'date': 'Jul 04, 2023',
+      'status': InspectionStatus.upcoming,
     },
     {
-      'name': 'Lucille Bluth',
-      'email': 'lucille@gmail.com',
-      'inspections': 44,
+      'project': 'Oxford',
+      'uprn': '73070',
+      'address': '333 Cherry Court, Lakeside',
+      'name': 'Maeby Funke',
+      'date': 'Sep 22, 2023',
+      'status': InspectionStatus.upcoming,
+    },
+    {
       'project': 'Sutton',
-      'date': 'Sep 01, 2022',
-      'status': 'Inactive',
+      'uprn': '5840',
+      'address': '888 Walnut Lane, Desert Ridge',
+      'name': 'Bob Loblaw',
+      'date': 'Mar 11, 2024',
+      'status': InspectionStatus.upcoming,
     },
     {
-      'name': 'Tobias Funke',
-      'email': 'tobias@gmail.com',
-      'inspections': 23,
-      'project': '--',
-      'date': 'Oct 19, 2023',
-      'status': 'Active',
-    },
-    {
-      'name': 'Buster Bluth',
-      'email': 'buster@gmail.com',
-      'inspections': 64,
-      'project': 'Greenwich',
-      'date': 'Mar 07, 2023',
-      'status': 'Inactive',
-    },
-    {
+      'project': 'LBHF',
+      'uprn': '71045',
+      'address': '777 Spruce Street, Greenfield',
       'name': 'Lindsay Bluth',
-      'email': 'lindsay@gmail.com',
-      'inspections': 12,
-      'project': 'Greenwich',
-      'date': 'Jun 12, 2022',
-      'status': 'Active',
+      'date': 'Aug 01, 2023',
+      'status': InspectionStatus.upcoming,
     },
     {
-      'name': 'Gob Bluth',
-      'email': 'gob@gmail.com',
-      'inspections': 15,
-      'project': '--',
-      'date': 'Apr 26, 2023',
-      'status': 'Active',
+      'project': 'Wandsworth',
+      'uprn': '28944',
+      'address': '111 Pine Avenue, Summerfield',
+      'name': 'Kitty Sanchez',
+      'date': 'Jun 14, 2023',
+      'status': InspectionStatus.completed,
+    },
+    {
+      'project': 'Greenwich',
+      'uprn': '16021',
+      'address': '444 Birch Lane, Riverside',
+      'name': 'Tobias Funke',
+      'date': 'Oct 08, 2023',
+      'status': InspectionStatus.completed,
+    },
+    {
+      'project': 'LBHF',
+      'uprn': '46508',
+      'address': '555 Cedar Road, Mountainview',
+      'name': 'Lindsay Bluth',
+      'date': 'Feb 29, 2024',
+      'status': InspectionStatus.completed,
+    },
+    {
+      'project': 'Guildford',
+      'uprn': '73070',
+      'address': '555 Cedar Road, Mountainview',
+      'name': 'Lindsay Bluth',
+      'date': 'Feb 29, 2024',
+      'status': InspectionStatus.completed,
+    },
+    {
+      'project': 'Sutton',
+      'uprn': '5840',
+      'address': '999 Willow Way, Oakville',
+      'name': 'George Michael',
+      'date': 'Apr 15, 2024',
+      'status': InspectionStatus.inProgress,
+    },
+    {
+      'project': 'Oxford',
+      'uprn': '71045',
+      'address': '123 Birch Street, Maplewood',
+      'name': 'Kitty Sanchez',
+      'date': 'May 20, 2024',
+      'status': InspectionStatus.upcoming,
     },
   ];
 }

@@ -11,7 +11,7 @@ class StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Chip(
-      padding: const EdgeInsets.only(left: 5),
+      padding: const EdgeInsets.only(left: 5, top: 0, bottom: 0, right: 0),
       avatarBoxConstraints: const BoxConstraints(maxHeight: 6, maxWidth: 6),
       avatar: Container(
         width: 6,
@@ -21,7 +21,7 @@ class StatusChip extends StatelessWidget {
           shape: BoxShape.circle,
         ),
       ),
-      labelPadding: const EdgeInsets.only(left: 4, right: 5),
+      labelPadding: const EdgeInsets.only(left: 4, right: 5, top: 0, bottom: 0),
       label: Text(
         title ?? status.label,
         style: AppFonts.black12w400.copyWith(color: status.fontColor),
