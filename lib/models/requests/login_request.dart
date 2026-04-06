@@ -17,6 +17,10 @@ class LoginRequest extends BaseRequest {
     required this.role,
   });
 
+  factory LoginRequest.fromJson(Map<String, dynamic> json) {
+    return _$LoginRequestFromJson(json);
+  }
+
   @override
   Map<String, dynamic> toJson() {
     return _$LoginRequestToJson(this);

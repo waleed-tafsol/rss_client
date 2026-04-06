@@ -34,6 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _pinController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPassController = TextEditingController();
   final _loginFormKey = GlobalKey<FormState>();
 
   void _onSignInPressed() {
@@ -57,6 +59,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .forgotPassword(email: _emailController.text.trim());
   }
 
+  void _onOtpSubmitTap() {
+    if (!_loginFormKey.currentState!.validate()) {
+      return;
+    }
+    ref
+        .read(authProvider.notifier)
+        .verifyOtp(
+          email: _emailController.text.trim(),
+          otp: _pinController.text.trim(),
+        );
+  }
+
   Future<void> _listener(AuthState? prev, AuthState next) async {
     if (next.user != null) {
       context.go(OverViewScreen.routeName);
@@ -71,6 +85,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     _passwordController.dispose();
     _hidePassword.dispose();
     _pinController.dispose();
+    _newPasswordController.dispose();
+    _confirmPassController.dispose();
     super.dispose();
   }
 
@@ -105,31 +121,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Consumer(
         builder: (_, ref, _) {
           final authView = ref.watch(authProvider.select((s) => s.authView));
+          final child = switch (authView) {
+            AuthView.login => _buildLoginView(context),
+            AuthView.forgotPassword => _buildForgotPasswordView(),
+            AuthView.otp => _buildOtpView(),
+            AuthView.resetPassword => _buildResetPasswordView(),
+          };
           return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: switch (authView) {
-              AuthView.login => _buildLoginView(context),
-              AuthView.forgotPassword => _buildForgotPasswordView(),
-              AuthView.otp => _buildOtpView(),
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (child, animation) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
             },
+            child: child,
           );
         },
       ),
-      // child: PageView.builder(
-      //   physics: const NeverScrollableScrollPhysics(),
-      //   itemCount: 3,
-      //   itemBuilder: (_, index) => switch (index) {
-      //     0 => _buildLoginView(context),
-      //     1 => _buildForgotPasswordView(),
-      //     2 => _buildOtpView(),
-      //     int() => throw UnimplementedError(),
-      //   },
-      // ),
     );
   }
 
   Column _buildLoginView(BuildContext context) {
     return Column(
+      key: const ValueKey(AuthView.login),
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: .center,
       children: [
@@ -217,8 +235,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildForgotPasswordView() {
+  Column _buildForgotPasswordView() {
     return Column(
+      key: const ValueKey(AuthView.forgotPassword),
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: .center,
       children: [
@@ -252,8 +271,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildOtpView() {
+  Column _buildOtpView() {
     return Column(
+      key: const ValueKey(AuthView.otp),
       crossAxisAlignment: .start,
       mainAxisAlignment: .center,
       children: [
@@ -289,8 +309,69 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             return AppGradientButton(
               title: 'Submit',
               icon: Icons.arrow_forward,
-              onTap: () {},
-              // onTap: _onOtpSubmitTap,
+              onTap: _onOtpSubmitTap,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Column _buildResetPasswordView() {
+    return Column(
+      children: [
+        IconButton(
+          onPressed: () async {
+            ref.read(authProvider.notifier).changeView(AuthView.login);
+          },
+          icon: const Icon(TablerIcons.chevronLeft),
+        ),
+        SizedBox(height: 32.h),
+        ValueListenableBuilder(
+          valueListenable: _hidePassword,
+          builder: (context, hidePassword, _) {
+            return Column(
+              spacing: 16.sp,
+              children: [
+                AppTextField(
+                  controller: _newPasswordController,
+                  title: 'New password',
+                  validator: Validators.password,
+                  hide: hidePassword,
+                  suffix: IconButton(
+                    onPressed: () => _hidePassword.value = !hidePassword,
+                    icon: Icon(
+                      hidePassword ? TablerIcons.eye : TablerIcons.eyeOff,
+                    ),
+                  ),
+                ),
+                AppTextField(
+                  controller: _confirmPassController,
+                  title: 'Confirm password',
+                  validator: Validators.password,
+                  hide: hidePassword,
+                  suffix: IconButton(
+                    onPressed: () => _hidePassword.value = !hidePassword,
+                    icon: Icon(
+                      hidePassword ? TablerIcons.eye : TablerIcons.eyeOff,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        SizedBox(height: 32.sp),
+        Consumer(
+          builder: (_, ref, _) {
+            final loading = ref.watch(authProvider.select((s) => s.loading));
+            if (loading) {
+              return const AppLoader();
+            }
+            return AppGradientButton(
+              title: 'Submit',
+              icon: Icons.arrow_forward,
+              onTap: _onOtpSubmitTap,
             );
           },
         ),

@@ -50,6 +50,15 @@ class AuthViewModel extends BaseViewModel<AuthState> {
     });
   }
 
+  Future<void> verifyOtp({required String email, required String otp}) async {
+    return await runSafely(() async {
+      state = state.copyWith(loading: true);
+      await locator<AuthService>().verifyOtp(email: email, otp: otp);
+      state = state.copyWith(loading: false, authView: AuthView.resetPassword);
+      EasyLoading.showSuccess('Email verified!');
+    });
+  }
+
   void changeView(AuthView authView) async {
     state = state.copyWith(authView: authView);
   }

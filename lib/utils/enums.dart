@@ -17,4 +17,4 @@ enum PropertyDetailFilter { inspectionChecklist, modulesOverview, costSummary }
 
 enum SettingsType { profile, password }
 
-enum AuthView { login, forgotPassword, otp }
+enum AuthView { login, forgotPassword, otp, resetPassword }

@@ -32,4 +32,13 @@ class AuthService {
       throw AppException(response.message ?? 'Something went wrong!');
     }
   }
+
+  Future<void> verifyOtp({required String email, required String otp}) async {
+    final response = await locator<AuthApi>().verifyOtp(
+      VerifyOtpRequest(email: email, otp: otp),
+    );
+    if (!(response.success ?? false)) {
+      throw AppException(response.message ?? 'Something went wrong!');
+    }
+  }
 }
