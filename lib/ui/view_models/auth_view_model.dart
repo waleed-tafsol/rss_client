@@ -50,6 +50,10 @@ class AuthViewModel extends BaseViewModel<AuthState> {
     });
   }
 
+  void changeView(AuthView authView) async {
+    state = state.copyWith(authView: authView);
+  }
+
   @override
   void handleError(String message) {
     state = state.copyWith(loading: false);

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../utils/context_utils.dart';
@@ -29,10 +30,10 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final ValueNotifier<bool> _rememberMe = ValueNotifier<bool>(true);
-  final _authPageController = PageController();
   final _hidePassword = ValueNotifier(true);
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _pinController = TextEditingController();
   final _loginFormKey = GlobalKey<FormState>();
 
   void _onSignInPressed() {
@@ -61,26 +62,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context.go(OverViewScreen.routeName);
     }
     log('AUTH VIEW: ${next.authView}');
-    switch (next.authView) {
-      case AuthView.otp:
-        await _authPageController.animateToPage(
-          2,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-        );
-        break;
-      default:
-        break;
-    }
   }
 
   @override
   void dispose() {
     _rememberMe.dispose();
-    _authPageController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _hidePassword.dispose();
+    _pinController.dispose();
     super.dispose();
   }
 
@@ -112,16 +102,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildBody(BuildContext context) {
     return Form(
       key: _loginFormKey,
-      child: PageView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _authPageController,
-        itemBuilder: (_, index) => switch (index) {
-          0 => _buildLoginView(context),
-          1 => _buildForgotPasswordView(),
-          2 => const SizedBox.shrink(),
-          int() => throw UnimplementedError(),
+      child: Consumer(
+        builder: (_, ref, _) {
+          final authView = ref.watch(authProvider.select((s) => s.authView));
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: switch (authView) {
+              AuthView.login => _buildLoginView(context),
+              AuthView.forgotPassword => _buildForgotPasswordView(),
+              AuthView.otp => _buildOtpView(),
+            },
+          );
         },
       ),
+      // child: PageView.builder(
+      //   physics: const NeverScrollableScrollPhysics(),
+      //   itemCount: 3,
+      //   itemBuilder: (_, index) => switch (index) {
+      //     0 => _buildLoginView(context),
+      //     1 => _buildForgotPasswordView(),
+      //     2 => _buildOtpView(),
+      //     int() => throw UnimplementedError(),
+      //   },
+      // ),
     );
   }
 
@@ -182,11 +185,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const Spacer(),
             TextButton(
               onPressed: () async {
-                await _authPageController.animateToPage(
-                  1,
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.linear,
-                );
+                ref
+                    .read(authProvider.notifier)
+                    .changeView(AuthView.forgotPassword);
               },
               child: Text(
                 "Forgot Password?",
@@ -223,11 +224,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children: [
         IconButton(
           onPressed: () async {
-            await _authPageController.animateToPage(
-              0,
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.linear,
-            );
+            ref.read(authProvider.notifier).changeView(AuthView.login);
           },
           icon: const Icon(TablerIcons.chevronLeft),
         ),
@@ -248,6 +245,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               title: 'Submit',
               icon: Icons.arrow_forward,
               onTap: _onForgotPasswordSubmitTap,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOtpView() {
+    return Column(
+      crossAxisAlignment: .start,
+      mainAxisAlignment: .center,
+      children: [
+        IconButton(
+          onPressed: () async {
+            ref.read(authProvider.notifier).changeView(AuthView.login);
+          },
+          icon: const Icon(TablerIcons.chevronLeft),
+        ),
+        SizedBox(height: 32.h),
+        Center(
+          child: Pinput(
+            controller: _pinController,
+            length: 4,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Pin cannot be empty';
+              }
+              if (value.length != 4) {
+                return 'Pin must be 4 digits';
+              }
+              return null;
+            },
+          ),
+        ),
+        SizedBox(height: 32.sp),
+        Consumer(
+          builder: (_, ref, _) {
+            final loading = ref.watch(authProvider.select((s) => s.loading));
+            if (loading) {
+              return const AppLoader();
+            }
+            return AppGradientButton(
+              title: 'Submit',
+              icon: Icons.arrow_forward,
+              onTap: () {},
+              // onTap: _onOtpSubmitTap,
             );
           },
         ),
