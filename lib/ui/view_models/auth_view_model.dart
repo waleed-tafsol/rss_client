@@ -18,7 +18,7 @@ class AuthViewModel extends BaseViewModel {
   User? get user => _user;
   AuthView? get authView => _authView;
   String? get resetToken => _resetToken;
-  
+
   bool get isLoggedIn => _user != null;
   bool get isLoginView => _authView == AuthView.login;
   bool get isForgotPasswordView => _authView == AuthView.forgotPassword;
@@ -57,7 +57,7 @@ class AuthViewModel extends BaseViewModel {
         request: LoginRequest(
           email: email,
           password: password,
-          role: UserType.admin,
+          role: UserType.client,
         ),
       );
       _loading = false;
