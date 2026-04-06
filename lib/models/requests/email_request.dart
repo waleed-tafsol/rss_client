@@ -10,6 +10,9 @@ class EmailRequest extends BaseRequest {
 
   const EmailRequest({required this.email});
 
+  factory EmailRequest.fromJson(Map<String, dynamic> json) {
+    return _$EmailRequestFromJson(json);
+  }
   @override
   Map<String, dynamic> toJson() {
     return _$EmailRequestToJson(this);

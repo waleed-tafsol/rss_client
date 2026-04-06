@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../utils/context_utils.dart';
@@ -29,10 +30,12 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final ValueNotifier<bool> _rememberMe = ValueNotifier<bool>(true);
-  final _authPageController = PageController();
   final _hidePassword = ValueNotifier(true);
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _pinController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPassController = TextEditingController();
   final _loginFormKey = GlobalKey<FormState>();
 
   void _onSignInPressed() {
@@ -56,31 +59,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .forgotPassword(email: _emailController.text.trim());
   }
 
+  void _onOtpSubmitTap() {
+    if (!_loginFormKey.currentState!.validate()) {
+      return;
+    }
+    ref
+        .read(authProvider.notifier)
+        .verifyOtp(
+          email: _emailController.text.trim(),
+          otp: _pinController.text.trim(),
+        );
+  }
+
   Future<void> _listener(AuthState? prev, AuthState next) async {
     if (next.user != null) {
       context.go(OverViewScreen.routeName);
     }
     log('AUTH VIEW: ${next.authView}');
-    switch (next.authView) {
-      case AuthView.otp:
-        await _authPageController.animateToPage(
-          2,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-        );
-        break;
-      default:
-        break;
-    }
   }
 
   @override
   void dispose() {
     _rememberMe.dispose();
-    _authPageController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _hidePassword.dispose();
+    _pinController.dispose();
+    _newPasswordController.dispose();
+    _confirmPassController.dispose();
     super.dispose();
   }
 
@@ -112,14 +118,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildBody(BuildContext context) {
     return Form(
       key: _loginFormKey,
-      child: PageView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: _authPageController,
-        itemBuilder: (_, index) => switch (index) {
-          0 => _buildLoginView(context),
-          1 => _buildForgotPasswordView(),
-          2 => const SizedBox.shrink(),
-          int() => throw UnimplementedError(),
+      child: Consumer(
+        builder: (_, ref, _) {
+          final authView = ref.watch(authProvider.select((s) => s.authView));
+          final child = switch (authView) {
+            AuthView.login => _buildLoginView(context),
+            AuthView.forgotPassword => _buildForgotPasswordView(),
+            AuthView.otp => _buildOtpView(),
+            AuthView.resetPassword => _buildResetPasswordView(),
+          };
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (child, animation) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+            child: child,
+          );
         },
       ),
     );
@@ -127,6 +147,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Column _buildLoginView(BuildContext context) {
     return Column(
+      key: const ValueKey(AuthView.login),
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: .center,
       children: [
@@ -182,11 +203,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const Spacer(),
             TextButton(
               onPressed: () async {
-                await _authPageController.animateToPage(
-                  1,
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.linear,
-                );
+                ref
+                    .read(authProvider.notifier)
+                    .changeView(AuthView.forgotPassword);
               },
               child: Text(
                 "Forgot Password?",
@@ -217,18 +236,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildForgotPasswordView() {
+  Column _buildForgotPasswordView() {
     return Column(
+      key: const ValueKey(AuthView.forgotPassword),
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: .center,
       children: [
         IconButton(
           onPressed: () async {
-            await _authPageController.animateToPage(
-              0,
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.linear,
-            );
+            ref.read(authProvider.notifier).changeView(AuthView.login);
           },
           icon: const Icon(TablerIcons.chevronLeft),
         ),
@@ -249,6 +265,114 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               title: 'Submit',
               icon: Icons.arrow_forward,
               onTap: _onForgotPasswordSubmitTap,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Column _buildOtpView() {
+    return Column(
+      key: const ValueKey(AuthView.otp),
+      crossAxisAlignment: .start,
+      mainAxisAlignment: .center,
+      children: [
+        IconButton(
+          onPressed: () async {
+            ref.read(authProvider.notifier).changeView(AuthView.login);
+          },
+          icon: const Icon(TablerIcons.chevronLeft),
+        ),
+        SizedBox(height: 32.h),
+        Center(
+          child: Pinput(
+            controller: _pinController,
+            length: 4,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Pin cannot be empty';
+              }
+              if (value.length != 4) {
+                return 'Pin must be 4 digits';
+              }
+              return null;
+            },
+          ),
+        ),
+        SizedBox(height: 32.sp),
+        Consumer(
+          builder: (_, ref, _) {
+            final loading = ref.watch(authProvider.select((s) => s.loading));
+            if (loading) {
+              return const AppLoader();
+            }
+            return AppGradientButton(
+              title: 'Submit',
+              icon: Icons.arrow_forward,
+              onTap: _onOtpSubmitTap,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Column _buildResetPasswordView() {
+    return Column(
+      children: [
+        IconButton(
+          onPressed: () async {
+            ref.read(authProvider.notifier).changeView(AuthView.login);
+          },
+          icon: const Icon(TablerIcons.chevronLeft),
+        ),
+        SizedBox(height: 32.h),
+        ValueListenableBuilder(
+          valueListenable: _hidePassword,
+          builder: (context, hidePassword, _) {
+            return Column(
+              spacing: 16.sp,
+              children: [
+                AppTextField(
+                  controller: _newPasswordController,
+                  title: 'New password',
+                  validator: Validators.password,
+                  hide: hidePassword,
+                  suffix: IconButton(
+                    onPressed: () => _hidePassword.value = !hidePassword,
+                    icon: Icon(
+                      hidePassword ? TablerIcons.eye : TablerIcons.eyeOff,
+                    ),
+                  ),
+                ),
+                AppTextField(
+                  controller: _confirmPassController,
+                  title: 'Confirm password',
+                  validator: Validators.password,
+                  hide: hidePassword,
+                  suffix: IconButton(
+                    onPressed: () => _hidePassword.value = !hidePassword,
+                    icon: Icon(
+                      hidePassword ? TablerIcons.eye : TablerIcons.eyeOff,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        SizedBox(height: 32.sp),
+        Consumer(
+          builder: (_, ref, _) {
+            final loading = ref.watch(authProvider.select((s) => s.loading));
+            if (loading) {
+              return const AppLoader();
+            }
+            return AppGradientButton(
+              title: 'Submit',
+              icon: Icons.arrow_forward,
+              onTap: _onOtpSubmitTap,
             );
           },
         ),

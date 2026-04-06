@@ -1,6 +1,7 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../exceptions/app_exception.dart';
 import '../../models/requests/login_request.dart';
 import '../../models/responses/auth_response.dart';
 import '../../services/locator.dart';
@@ -50,6 +51,52 @@ class AuthViewModel extends BaseViewModel<AuthState> {
     });
   }
 
+  Future<void> verifyOtp({required String email, required String otp}) async {
+    return await runSafely(() async {
+      state = state.copyWith(loading: true);
+      final resetToken = await locator<AuthService>().verifyOtp(
+        email: email,
+        otp: otp,
+      );
+      state = state.copyWith(
+        loading: false,
+        authView: AuthView.resetPassword,
+        resetToken: resetToken,
+      );
+      EasyLoading.showSuccess('Email verified!');
+    });
+  }
+
+  Future<void> resetPassword({
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    return await runSafely(() async {
+      final resetToken = state.resetToken;
+      if (resetToken == null) {
+        throw const AppException(
+          'Resend token not found, please send otp again!',
+        );
+      }
+      state = state.copyWith(loading: true);
+      await locator<AuthService>().resetPassword(
+        resetToken: resetToken,
+        password: password,
+        passwordConfirmation: passwordConfirmation,
+      );
+      state = state.copyWith(
+        loading: false,
+        authView: AuthView.login,
+        resetToken: null,
+      );
+      EasyLoading.showSuccess('Password reset successfully!');
+    });
+  }
+
+  void changeView(AuthView authView) async {
+    state = state.copyWith(authView: authView);
+  }
+
   @override
   void handleError(String message) {
     state = state.copyWith(loading: false);
@@ -62,18 +109,26 @@ class AuthState {
   final bool loading;
   final User? user;
   final AuthView authView;
+  final String? resetToken;
 
   const AuthState({
     this.loading = false,
     this.user,
     this.authView = AuthView.login,
+    this.resetToken,
   });
 
-  AuthState copyWith({bool? loading, User? user, AuthView? authView}) {
+  AuthState copyWith({
+    bool? loading,
+    User? user,
+    AuthView? authView,
+    String? resetToken,
+  }) {
     return AuthState(
       loading: loading ?? this.loading,
       user: user ?? this.user,
       authView: authView ?? this.authView,
+      resetToken: resetToken,
     );
   }
 }
