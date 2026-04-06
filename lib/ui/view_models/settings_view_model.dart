@@ -1,12 +1,19 @@
-import '../../utils/enums.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
-class SettingsViewModel extends BaseViewModel {
-  SettingsType settingsType = SettingsType.profile;
+final settingsProvider = NotifierProvider.autoDispose(
+  () => SettingsViewModel._(),
+);
+
+class SettingsViewModel extends BaseViewModel<SettingsType> {
+  SettingsViewModel._() : super(SettingsType.profile);
 
   void updateSettingsType(SettingsType newSettingsType) {
-    settingsType = newSettingsType;
-    notifyListeners();
+    if (state == newSettingsType) {
+      return;
+    }
+    state = newSettingsType;
   }
 }

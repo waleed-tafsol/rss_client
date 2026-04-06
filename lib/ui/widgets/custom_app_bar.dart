@@ -1,32 +1,34 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../screens/login_screen.dart';
-import '../view_models/app_view_model.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../utils/context_utils.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
+import '../screens/login_screen.dart';
+import '../view_models/app_view_model.dart';
+import '../view_models/auth_view_model.dart';
 import 'app_network_image.dart';
 
-class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
+class CustomAppBar extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   final SidebarXController controller;
 
   const CustomAppBar({super.key, required this.controller});
 
   @override
-  State<CustomAppBar> createState() => _CustomAppBarState();
+  ConsumerState<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
   Size get preferredSize => Size(double.infinity, 70.sp);
 }
 
-class _CustomAppBarState extends State<CustomAppBar> {
+class _CustomAppBarState extends ConsumerState<CustomAppBar> {
   final _notificationMenuController = MenuController();
   final _appMenuController = MenuController();
 
@@ -46,8 +48,20 @@ class _CustomAppBarState extends State<CustomAppBar> {
     }
   }
 
+  void _onLogoutPressed() {
+    ref.read(authProvider.notifier).logout();
+  }
+
+  void _listener(AuthState? prev, AuthState next) {
+    if (next.user == null) {
+      ref.read(appProvider.notifier).setIsLoggedIn(false);
+      GoRouter.of(context).go(LoginScreen.routeName);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(authProvider, _listener);
     final canPop = GoRouter.of(context).state.uri.pathSegments.length > 1;
     log('NAME: ${GoRouter.of(context).state.uri}');
     return SizedBox(
@@ -107,58 +121,72 @@ class _CustomAppBarState extends State<CustomAppBar> {
     );
   }
 
-  MenuAnchor _buildAvatar(BuildContext context) {
-    return MenuAnchor(
-      controller: _appMenuController,
-      alignmentOffset: const Offset(0, 10),
-      menuChildren: [
-        ListTile(
-          onTap: () {
-            // html.window.history.pushState(null, '', '');
-            context.read<AppViewModel>().setIsLoggedIn(false);
-            GoRouter.of(context).go(LoginScreen.routeName);
-          },
-          minLeadingWidth: 40.w,
-          title: Text('Logout', style: AppFonts.red14w400),
-          leading: Icon(TablerIcons.logout, color: AppColors.red, size: 24.sp),
-        ),
-      ],
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100.r),
-        ),
-        margin: EdgeInsets.zero,
-        child: InkWell(
-          onTap: _onAvatarTap,
-          child: Row(
-            crossAxisAlignment: .center,
-            children: [
-              SizedBox(width: 4.w),
-              ClipRRect(
-                clipBehavior: Clip.antiAlias,
-                borderRadius: BorderRadius.circular(30.r),
-                child: AppNetworkImage(
-                  width: 32.w,
-                  imageUrl: 'https://picsum.photos/400/400',
-                ),
+  Consumer _buildAvatar(BuildContext context) {
+    return Consumer(
+      builder: (_, ref, _) {
+        return MenuAnchor(
+          controller: _appMenuController,
+          alignmentOffset: const Offset(0, 10),
+          menuChildren: [
+            ListTile(
+              onTap: _onLogoutPressed,
+              minLeadingWidth: 40.w,
+              title: Text('Logout', style: AppFonts.red14w400),
+              leading: Icon(
+                TablerIcons.logout,
+                color: AppColors.red,
+                size: 24.sp,
               ),
-              SizedBox(width: 8.w),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ],
+          child: Card(
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(100.r),
+            ),
+            margin: EdgeInsets.zero,
+            child: InkWell(
+              onTap: _onAvatarTap,
+              child: Row(
+                crossAxisAlignment: .center,
                 children: [
-                  Text('Eren Yeager', style: AppFonts.black14w500),
-                  Text('Admin', style: AppFonts.grey12w400),
+                  SizedBox(width: 4.w),
+                  ClipRRect(
+                    clipBehavior: Clip.antiAlias,
+                    borderRadius: BorderRadius.circular(30.r),
+                    child: AppNetworkImage(
+                      width: 32.w,
+                      imageUrl: 'https://picsum.photos/400/400',
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Consumer(
+                    builder: (_, ref, _) {
+                      final user = ref.watch(
+                        authProvider.select((s) => s.user),
+                      );
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user?.name ?? 'N/A',
+                            style: AppFonts.black14w500,
+                          ),
+                          Text('Client', style: AppFonts.grey12w400),
+                        ],
+                      );
+                    },
+                  ),
+                  SizedBox(width: 12.w),
+                  Icon(TablerIcons.chevronDown, size: 24.sp),
+                  SizedBox(width: 12.w),
                 ],
               ),
-              SizedBox(width: 12.w),
-              Icon(TablerIcons.chevronDown, size: 24.sp),
-              SizedBox(width: 12.w),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

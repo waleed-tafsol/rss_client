@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import '../screens/dashboard/project_management.dart';
-import '../screens/dashboard/settings.dart';
-import '../screens/dashboard/surveyors_analytics.dart';
-import 'app_gradient_button.dart';
 import 'package:sidebarx/sidebarx.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
@@ -13,9 +9,10 @@ import '../../models/ui/rail_item.dart';
 import '../resources/app_assets.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
-import '../screens/dashboard/crud.dart';
 import '../screens/dashboard/overview_screen.dart';
-import '../screens/dashboard/user_management.dart';
+import '../screens/dashboard/settings.dart';
+import '../screens/dashboard/surveyors_analytics.dart';
+import 'app_gradient_button.dart';
 
 class AppDrawer extends StatefulWidget {
   final SidebarXController controller;
@@ -43,23 +40,8 @@ class _AppDrawerState extends State<AppDrawer> {
       routeName: OverViewScreen.routeName,
     ),
     const RailItem(
-      icon: TablerIcons.users,
-      label: 'User Management',
-      routeName: UserManagement.routeName,
-    ),
-    const RailItem(
       icon: TablerIcons.mapPin,
-      label: 'Project Management',
-      routeName: ProjectManagement.routeName,
-    ),
-    const RailItem(
-      icon: TablerIcons.layoutGrid,
-      label: 'CRUD',
-      routeName: Crud.routeName,
-    ),
-    const RailItem(
-      icon: TablerIcons.chartHistogram,
-      label: 'Surveyors Analytics',
+      label: 'Properties',
       routeName: SurveyorsAnalytics.routeName,
     ),
   ];

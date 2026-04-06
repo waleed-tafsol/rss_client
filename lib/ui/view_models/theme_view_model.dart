@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../services/locator.dart';
 import 'base_view_model.dart';
 
-class ThemeViewModel extends BaseViewModel {
-  ThemeMode themeMode = ThemeMode.light;
+final themeProvider = NotifierProvider(() => ThemeViewModel._());
+
+class ThemeViewModel extends BaseViewModel<ThemeMode> {
+  ThemeViewModel._() : super(ThemeMode.light);
 
   @override
   void init() async {
     super.init();
     final theme = await locator<StorageService>().getTheme();
     if (theme != null) {
-      themeMode = theme;
-      notifyListeners();
+      state = theme;
     }
   }
 
   void toggleTheme() {
-    final newTheme = themeMode == ThemeMode.light
+    final newTheme = state == ThemeMode.light
         ? ThemeMode.dark
         : ThemeMode.light;
-    themeMode = newTheme;
-    notifyListeners();
+    state = newTheme;
   }
 }

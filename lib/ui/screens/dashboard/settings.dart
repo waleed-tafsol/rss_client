@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
-import '../../view_models/settings_view_model.dart';
-import '../../widgets/app_text_field.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../../utils/enums.dart';
 import '../../../utils/string_utils.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
+import '../../view_models/settings_view_model.dart';
 import '../../widgets/app_gradient_button.dart';
 import '../../widgets/app_secondary_button.dart';
+import '../../widgets/app_text_field.dart';
 import '../../widgets/profile_form.dart';
 
 class Settings extends StatelessWidget {
@@ -19,8 +19,9 @@ class Settings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsViewModel>(
-      builder: (_, viewModel, _) {
+    return Consumer(
+      builder: (_, ref, _) {
+        final settingsType = ref.watch(settingsProvider);
         return Column(
           crossAxisAlignment: .start,
           spacing: 20.sp,
@@ -29,11 +30,13 @@ class Settings extends StatelessWidget {
               spacing: 12.w,
               children: List.generate(SettingsType.values.length, (index) {
                 final type = SettingsType.values[index];
-                final bool isSelected = viewModel.settingsType == type;
+                final bool isSelected = settingsType == type;
                 return ChoiceChip(
                   selected: isSelected,
                   onSelected: (_) {
-                    viewModel.updateSettingsType(type);
+                    ref
+                        .read(settingsProvider.notifier)
+                        .updateSettingsType(type);
                   },
                   showCheckmark: false,
                   backgroundColor: isSelected ? null : AppColors.white,
@@ -54,7 +57,7 @@ class Settings extends StatelessWidget {
             Card(
               child: Padding(
                 padding: EdgeInsets.all(16.w),
-                child: switch (viewModel.settingsType) {
+                child: switch (settingsType) {
                   SettingsType.profile => const ProfileForm(),
                   SettingsType.password => _buildPasswordView(),
                 },
@@ -66,7 +69,6 @@ class Settings extends StatelessWidget {
     );
   }
 
-  
   Widget _buildPasswordView() {
     return Column(
       crossAxisAlignment: .start,

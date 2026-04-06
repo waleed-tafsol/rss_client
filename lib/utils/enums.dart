@@ -1,4 +1,4 @@
-enum UserType { surveyors, clients }
+enum UserType { client, surveyor, admin }
 
 enum CrudType {
   stock('Stock'),
@@ -16,3 +16,5 @@ enum InspectionStatus { inProgress, upcoming, completed }
 enum PropertyDetailFilter { inspectionChecklist, modulesOverview, costSummary }
 
 enum SettingsType { profile, password }
+
+enum AuthView { login, forgotPassword, otp }

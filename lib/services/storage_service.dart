@@ -6,6 +6,8 @@ class StorageService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   static const String _themeModeKey = 'theme-mode';
+  static const String _accessTokenKey = 'access-token';
+  static const String _userKey = 'user-key';
 
   Future<void> saveTheme(ThemeMode themeMode) async {
     await _storage.write(key: _themeModeKey, value: themeMode.name);
@@ -17,5 +19,35 @@ class StorageService {
       return null;
     }
     return ThemeMode.values.byName(themeString);
+  }
+
+  Future<void> saveAccessToken(String? accessToken) async {
+    if (accessToken == null) {
+      return;
+    }
+    await _storage.write(key: _accessTokenKey, value: accessToken);
+  }
+
+  Future<String?> getAccessToken() async {
+    return await _storage.read(key: _accessTokenKey);
+  }
+
+  Future<void> saveUser(User? user) async {
+    if (user == null) {
+      return;
+    }
+    await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
+  }
+
+  Future<User?> getUser() async {
+    final userString = await _storage.read(key: _userKey);
+    if (userString == null) {
+      return null;
+    }
+    return User.fromJson(jsonDecode(userString));
+  }
+
+  Future<void> clear() async {
+    await _storage.deleteAll();
   }
 }
