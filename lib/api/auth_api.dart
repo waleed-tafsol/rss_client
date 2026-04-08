@@ -8,6 +8,7 @@ import '../models/requests/reset_password_request.dart';
 import '../models/requests/verify_otp_request.dart';
 import '../models/responses/auth_response.dart';
 import '../models/responses/base_response.dart';
+import '../models/responses/get_me_response.dart';
 import '../models/responses/verify_otp_response.dart';
 
 part 'auth_api.g.dart';
@@ -30,4 +31,9 @@ abstract class AuthApi {
 
   @POST('/reset-password')
   Future<BaseResponse> resetPassword(@Body() ResetPasswordRequest request);
+
+  @GET('/user/me')
+  Future<GetMeResponse> getMe();
+
+
 }

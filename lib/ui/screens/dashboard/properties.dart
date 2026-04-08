@@ -2,18 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'package:provider/provider.dart';
 
 import '../../../utils/adaptive_layout_row_column.dart';
 import '../../../utils/context_utils.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
 
+import '../../view_models/project_view_model.dart';
 import '../../widgets/app_dropdown.dart';
 import '../../widgets/number_paginator.dart';
 import '../../../utils/enums.dart';
 import '../../../utils/string_utils.dart';
-
 
 import '../../widgets/app_table.dart';
 
@@ -26,6 +26,15 @@ class Properties extends StatefulWidget {
 }
 
 class _PropertiesState extends State<Properties> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProjectViewModel>().getProjectList();
+    });
+
+    super.initState();
+  }
+
   int _currentPage = 0;
 
   String? _selectedAssignedSurveyor;
@@ -37,28 +46,38 @@ class _PropertiesState extends State<Properties> {
 
   @override
   Widget build(BuildContext context) {
-   
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Card(
-                child: Padding(
-                  padding: EdgeInsets.all(16.w),
-                  child: Column(
-                    spacing: 16.sp,
-                    children: [
-                      _buildHeader(),
-                      const Expanded(child: AppTable()),
-                      _buildFooter(),
-                    ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                spacing: 16.sp,
+                children: [
+                  _buildHeader(),
+                  Consumer<ProjectViewModel>(
+                    builder: (context, projectVM, _) {
+                      final loading = projectVM.loading;
+                      final projectList = projectVM.project;
+                      if (loading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (projectVM.project.isEmpty) {
+                        return const Center(child: Text('No Data Found'));
+                      }
+                      return Expanded(child: AppTable(project: projectList));
+                    },
                   ),
-                ),
+                  _buildFooter(),
+                ],
               ),
             ),
-          ],
-        );
-     
+          ),
+        ),
+      ],
+    );
   }
 
   Row _buildFooter() {

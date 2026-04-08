@@ -8,15 +8,18 @@ import 'package:get_it/get_it.dart';
 
 import '../api/api_constants.dart';
 import '../api/auth_api.dart';
+import '../api/project_api.dart';
 import '../exceptions/app_exception.dart';
 import '../models/requests/email_request.dart';
 import '../models/requests/login_request.dart';
 import '../models/requests/reset_password_request.dart';
 import '../models/requests/verify_otp_request.dart';
-import '../models/responses/auth_response.dart';
 import '../models/responses/base_response.dart';
+import '../models/responses/get_me_response.dart';
+import '../models/responses/project_list_response.dart';
 
 part 'auth_service.dart';
+part 'project_service.dart';
 part 'storage_service.dart';
 
 final locator = GetIt.instance;
@@ -49,9 +52,11 @@ Future<void> initializeServices() async {
 
   // APIS
   locator..registerLazySingleton(() => AuthApi(dio));
+  locator..registerLazySingleton(() => ProjectApi(dio));
 
   // Services
   locator
     ..registerLazySingleton(() => StorageService._())
-    ..registerLazySingleton(() => AuthService._());
+    ..registerLazySingleton(() => AuthService._())
+    ..registerLazySingleton(() => ProjectService._());
 }

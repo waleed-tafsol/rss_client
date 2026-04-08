@@ -14,6 +14,7 @@ import 'ui/view_models/auth_view_model.dart';
 import 'ui/view_models/settings_view_model.dart';
 import 'ui/view_models/theme_view_model.dart';
 import 'ui/view_models/crud_view_model.dart';
+import 'ui/view_models/project_view_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ThemeViewModel()..init()),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
         ChangeNotifierProvider(create: (_) => CrudViewModel()),
+        ChangeNotifierProvider(create: (_) => ProjectViewModel()),
       ],
       child: const RssClient(),
     ),

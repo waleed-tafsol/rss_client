@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
+import '../../models/responses/project_list_response.dart';
 import '../../utils/context_utils.dart';
+import '../../utils/date_time_utils.dart';
 import '../../utils/enums.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
@@ -13,7 +15,8 @@ import '../screens/dashboard/property_detail.dart';
 import 'status_chip.dart';
 
 class AppTable extends StatelessWidget {
-  const AppTable({super.key});
+  final List<Project?> project;
+  const AppTable({super.key, required this.project});
 
   @override
   Widget build(BuildContext context) {
@@ -98,19 +101,22 @@ class AppTable extends StatelessWidget {
       );
     }
 
-    final data = _dummyData[vicinity.row - 1];
+    final data = project[vicinity.row - 1];
     Widget child;
 
     switch (vicinity.column) {
       case 0:
-        child = Text(data['project'], style: AppFonts.black14w400);
+        child = Text(data?.name ?? 'N/A', style: AppFonts.black14w400);
         break;
       case 1:
-        child = Text(data['uprn'].toString(), style: AppFonts.black14w400);
+        child = Text(
+          data?.uid.toString() ?? 'N/A',
+          style: AppFonts.black14w400,
+        );
 
         break;
       case 2:
-        child = Text(data['address'], style: AppFonts.black14w400);
+        child = Text("'456 Elm Avenue, Westview'", style: AppFonts.black14w400);
 
         break;
       case 3:
@@ -125,16 +131,25 @@ class AppTable extends StatelessWidget {
               ),
             ),
             SizedBox(width: 12.w),
-            Flexible(child: Text(data['name'], style: AppFonts.black14w500)),
+            Flexible(
+              child: Text(data?.name ?? 'N/A', style: AppFonts.black14w500),
+            ),
           ],
         );
 
         break;
       case 4:
-        child = Text(data['date'], style: AppFonts.black14w400);
+        child = Text(
+          data?.createdAt?.formattedDate ?? "N/A",
+          style: AppFonts.black14w400,
+        );
         break;
       case 5:
-        child = StatusChip(status: data['status']);
+        child = StatusChip(
+          status: data?.status == 0
+              ? InspectionStatus.inProgress
+              : InspectionStatus.completed,
+        );
         break;
       case 6:
         final controller = MenuController();

@@ -5,7 +5,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../../exceptions/app_exception.dart';
 import '../../models/requests/login_request.dart';
-import '../../models/responses/auth_response.dart';
+import '../../models/responses/get_me_response.dart';
 import '../../services/locator.dart';
 import '../../utils/enums.dart';
 import 'base_view_model.dart';
@@ -145,6 +145,17 @@ class AuthViewModel extends BaseViewModel {
       notifyListeners();
     });
   }
+
+    Future<bool?> getMe() async {
+    return await runSafely(() async {
+      final user = await locator<AuthService>().getMe();
+      if (user.data != null) {
+        _user = user.data;
+      }
+      return true;
+    });
+  }
+
 
   Future<void> verifyOtp({required String email, required String otp}) async {
     return await runSafely(() async {

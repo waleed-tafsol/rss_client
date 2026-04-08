@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/enums.dart';
+import '../../services/locator.dart';
 import '../view_models/auth_view_model.dart';
 import 'dashboard/overview_screen.dart';
 import 'login_screen.dart';
@@ -28,16 +28,30 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-  void _authListener() {
+  void _authListener() async {
     if (!mounted) return;
-    final authViewModel = context.read<AuthViewModel>();
-    if (authViewModel.user != null) {
-      context.go(OverViewScreen.routeName);
-    } else if (authViewModel.authView == AuthView.login && !authViewModel.loading) {
-       // We only navigate to login if authentication check is finished and no user found.
-       // Note: checkAuthentication sets loading=false and notifies listeners.
-       context.go(LoginScreen.routeName);
+    final token = await locator<StorageService>().getAccessToken();
+    if(token != ""){
+final authViewModel = context.read<AuthViewModel>();
+    authViewModel.getMe().then((value) {
+      if (value == true) {
+        context.go(OverViewScreen.routeName);
+      } else {
+        context.go(LoginScreen.routeName);
+      }
+    });
+    }else {
+      context.go(LoginScreen.routeName);
     }
+    
+    // if (authViewModel.user != null) {
+    //   context.go(OverViewScreen.routeName);
+    // } else if (authViewModel.authView == AuthView.login &&
+    //     !authViewModel.loading) {
+    //   // We only navigate to login if authentication check is finished and no user found.
+    //   // Note: checkAuthentication sets loading=false and notifies listeners.
+    //   context.go(LoginScreen.routeName);
+    // }
   }
 
   @override

@@ -16,6 +16,15 @@ class AuthService {
     return response.data?.user;
   }
 
+  Future<GetMeResponse> getMe() async {
+    final response = await locator<AuthApi>().getMe();
+   
+    if (!response.success!) {
+      throw const AppException('Something went wrong!');
+    }
+    return response;
+  }
+
   Future<void> logout() async {
     final response = await locator<AuthApi>().logout();
     if (!(response.success ?? false)) {

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../utils/adaptive_layout_row_column.dart';
 import '../../../utils/context_utils.dart';
+import '../../view_models/project_view_model.dart';
 import '../../../utils/enums.dart';
+import 'package:provider/provider.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
 
@@ -22,6 +24,15 @@ class OverViewScreen extends StatefulWidget {
 }
 
 class _OverViewScreenState extends State<OverViewScreen> {
+
+ @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProjectViewModel>().getProjectList();
+    });
+    super.initState();
+  }
+
   String selectedPeriod = 'Monthly';
   @override
   Widget build(BuildContext context) {
@@ -222,7 +233,20 @@ class _OverViewScreenState extends State<OverViewScreen> {
                 ),
 
                 SizedBox(height: 16.w),
-                SizedBox(height: 337.sp, child: const AppTable()),
+                 Consumer<ProjectViewModel>(
+
+                    builder: (context,projectVM,_) {
+                        final loading = projectVM.loading;
+            final projectList = projectVM.project;
+            if (loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if(projectVM.project.isEmpty){
+              return const Center(child: Text('No Data Found'));
+            }
+                    return SizedBox(height: 337.sp, child:  AppTable(project: projectList));
+                  }
+                ),
               ],
             ),
           ),
