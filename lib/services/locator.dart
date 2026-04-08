@@ -14,6 +14,7 @@ import '../models/requests/login_request.dart';
 import '../models/requests/reset_password_request.dart';
 import '../models/requests/verify_otp_request.dart';
 import '../models/responses/auth_response.dart';
+import '../models/responses/base_response.dart';
 
 part 'auth_service.dart';
 part 'storage_service.dart';

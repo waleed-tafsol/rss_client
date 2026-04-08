@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../../exceptions/app_exception.dart';
@@ -18,7 +21,7 @@ class AuthViewModel extends BaseViewModel {
   User? get user => _user;
   AuthView? get authView => _authView;
   String? get resetToken => _resetToken;
-  
+
   bool get isLoggedIn => _user != null;
   bool get isLoginView => _authView == AuthView.login;
   bool get isForgotPasswordView => _authView == AuthView.forgotPassword;
@@ -49,6 +52,38 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  Timer? _otpTimer;
+  int _remainingTime = 120;
+  bool _isResendButtonEnabled = true;
+  bool get getIsResendButtonEnabled => _isResendButtonEnabled;
+  String get formattedTime {
+    log('_remainingTime: $_remainingTime'); // Debug print
+
+    if (_remainingTime.isNaN || _remainingTime <= 0) {
+      return "00:00s";
+    }
+
+    final minutes = (_remainingTime / 60).toInt();
+    final seconds = (_remainingTime % 60).toInt();
+    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}s";
+  }
+
+  void startOtpTimer() {
+    _remainingTime = 120;
+    _isResendButtonEnabled = false;
+    notifyListeners();
+    _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingTime > 0) {
+        _remainingTime--;
+        notifyListeners();
+      } else {
+        _otpTimer?.cancel();
+        _isResendButtonEnabled = true;
+        notifyListeners();
+      }
+    });
+  }
+
   Future<void> login({required String email, required String password}) async {
     return await runSafely(() async {
       setLoading(true);
@@ -57,7 +92,7 @@ class AuthViewModel extends BaseViewModel {
         request: LoginRequest(
           email: email,
           password: password,
-          role: UserType.admin,
+          role: UserType.client,
         ),
       );
       _loading = false;
@@ -85,12 +120,28 @@ class AuthViewModel extends BaseViewModel {
     });
   }
 
-  Future<void> forgotPassword({required String email}) async {
+  Future<void> forgotPassword({
+    required String email,
+    required bool showEasyLoading,
+  }) async {
     return await runSafely(() async {
-      setLoading(true);
-      await locator<AuthService>().forgotPassword(email: email);
-      _loading = false;
+      if (showEasyLoading) {
+        EasyLoading.show(status: 'Resending OTP...');
+      } else {
+        _loading = true;
+      }
+      notifyListeners();
+      final response = await locator<AuthService>().forgotPassword(
+        email: email,
+      );
+      if (showEasyLoading) {
+        EasyLoading.showSuccess(response.message ?? 'OTP resent successfully');
+      } else {
+        _loading = false;
+      }
+
       _authView = AuthView.otp;
+      startOtpTimer();
       notifyListeners();
     });
   }
@@ -102,9 +153,10 @@ class AuthViewModel extends BaseViewModel {
         email: email,
         otp: otp,
       );
-      _authView = AuthView.otp;
+      _authView = AuthView.resetPassword;
       _loading = false;
       _resetToken = resetToken;
+      _otpTimer?.cancel();
       EasyLoading.showSuccess('Email verified!');
       notifyListeners();
     });

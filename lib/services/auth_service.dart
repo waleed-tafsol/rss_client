@@ -24,13 +24,14 @@ class AuthService {
     await locator<StorageService>().clear();
   }
 
-  Future<void> forgotPassword({required String email}) async {
+  Future<BaseResponse> forgotPassword({required String email}) async {
     final response = await locator<AuthApi>().forgotPassword(
       EmailRequest(email: email),
     );
     if (!(response.success ?? false)) {
       throw AppException(response.message ?? 'Something went wrong!');
     }
+    return response;
   }
 
   Future<String?> verifyOtp({

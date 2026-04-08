@@ -39,20 +39,25 @@ class _LoginScreenState extends State<LoginScreen> {
   final _loginFormKey = GlobalKey<FormState>();
 
   void _onSignInPressed() {
+    _pinController.clear();
+
     if (!_loginFormKey.currentState!.validate()) {
       return;
     }
     context.read<AuthViewModel>().login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
   }
 
   void _onForgotPasswordSubmitTap() {
     if (!_loginFormKey.currentState!.validate()) {
       return;
     }
-    context.read<AuthViewModel>().forgotPassword(email: _emailController.text.trim());
+    context.read<AuthViewModel>().forgotPassword(
+      showEasyLoading: false,
+      email: _emailController.text.trim(),
+    );
   }
 
   void _onOtpSubmitTap() {
@@ -60,19 +65,21 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     context.read<AuthViewModel>().verifyOtp(
-          email: _emailController.text.trim(),
-          otp: _pinController.text.trim(),
-        );
+      email: _emailController.text.trim(),
+      otp: _pinController.text.trim(),
+    );
   }
 
   void _onResetPasswordSubmitTap() {
     if (!_loginFormKey.currentState!.validate()) {
       return;
     }
+
     context.read<AuthViewModel>().resetPassword(
-          password: _newPasswordController.text.trim(),
-          passwordConfirmation: _confirmPassController.text.trim(),
-        );
+      password: _newPasswordController.text.trim(),
+      passwordConfirmation: _confirmPassController.text.trim(),
+    );
+    clearControllers();
   }
 
   @override
@@ -103,6 +110,14 @@ class _LoginScreenState extends State<LoginScreen> {
     _newPasswordController.dispose();
     _confirmPassController.dispose();
     super.dispose();
+  }
+
+  void clearControllers() {
+    _emailController.clear();
+    _passwordController.clear();
+    _pinController.clear();
+    _newPasswordController.clear();
+    _confirmPassController.clear();
   }
 
   @override
@@ -218,7 +233,10 @@ class _LoginScreenState extends State<LoginScreen> {
             const Spacer(),
             TextButton(
               onPressed: () {
-                context.read<AuthViewModel>().setAuthView(AuthView.forgotPassword);
+                clearControllers();
+                context.read<AuthViewModel>().setAuthView(
+                  AuthView.forgotPassword,
+                );
               },
               child: Text(
                 "Forgot Password?",
@@ -312,6 +330,58 @@ class _LoginScreenState extends State<LoginScreen> {
             },
           ),
         ),
+        SizedBox(height: 10.h),
+        Consumer<AuthViewModel>(
+          builder: (context, authViewModel, _) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  authViewModel.formattedTime != "00:00s"
+                      ? "Resend OTP in ${authViewModel.formattedTime}"
+                      : "Didn't receive the OTP?",
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: authViewModel.getIsResendButtonEnabled
+                        ? AppColors.textBlack
+                        : Colors.grey,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                    if (authViewModel.getIsResendButtonEnabled) {
+                      authViewModel.forgotPassword(
+                        showEasyLoading: true,
+                        email: _emailController.text.trim(),
+                      );
+                    }
+
+                    // authViewModel.startOtpTimer();
+                    // authViewModel.getIsResendButtonEnabled
+                    //     ? authViewModel.callResendOtpApi(
+                    //         isForgotPassword: isForgetPassword,
+                    //       )
+                    //     : null;
+                  },
+                  child: Text(
+                    " Resend",
+                    style: TextStyle(
+                      fontFamily: "Promo",
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: authViewModel.getIsResendButtonEnabled
+                          ? Colors.blue
+                          : AppColors.textBlack,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+
         SizedBox(height: 32.sp),
         Selector<AuthViewModel, bool>(
           selector: (_, vm) => vm.loading,
