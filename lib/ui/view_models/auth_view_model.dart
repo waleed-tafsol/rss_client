@@ -11,10 +11,24 @@ import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
 class AuthViewModel extends BaseViewModel {
+
+
+   AuthViewModel() {
+    _hydrate();
+  }
+
+  Future<void> _hydrate() async {
+    final savedAuth = await locator<StorageService>().getUser();
+    if (savedAuth != null) {
+      _user = savedAuth;
+      notifyListeners();
+    }
+  }
   bool _loading = false;
   User? _user;
   AuthView? _authView = AuthView.login;
   String? _resetToken;
+  String? profileImage;
 
   // Getters
   bool get loading => _loading;
@@ -50,6 +64,14 @@ class AuthViewModel extends BaseViewModel {
   void setResetToken(String? token) {
     _resetToken = token;
     notifyListeners();
+  }
+
+   void updateProfileImage(String? imageBytes) {
+     
+   
+      profileImage = imageBytes;
+      notifyListeners();
+  
   }
 
   Timer? _otpTimer;
@@ -155,6 +177,8 @@ class AuthViewModel extends BaseViewModel {
       return true;
     });
   }
+
+
 
 
   Future<void> verifyOtp({required String email, required String otp}) async {

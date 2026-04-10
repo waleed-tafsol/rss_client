@@ -46,7 +46,7 @@ class AppNetworkImage extends StatelessWidget {
           return Icon(
             TablerIcons.fileBroken,
             color: Colors.grey,
-            size: width != null ? width! / 2 : null,
+            size: (width != null ? width! / 2 : null),
           );
         },
       ),

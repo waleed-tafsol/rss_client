@@ -18,10 +18,11 @@ class AuthService {
 
   Future<GetMeResponse> getMe() async {
     final response = await locator<AuthApi>().getMe();
-   
+
     if (!response.success!) {
       throw const AppException('Something went wrong!');
     }
+    await locator<StorageService>().saveUser(response.data);
     return response;
   }
 

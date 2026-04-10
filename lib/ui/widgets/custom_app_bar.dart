@@ -8,6 +8,7 @@ import 'package:sidebarx/sidebarx.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../utils/context_utils.dart';
+import '../../utils/string_utils.dart';
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
 import '../screens/dashboard/notification.dart';
@@ -16,14 +17,13 @@ import '../view_models/app_view_model.dart';
 import '../view_models/auth_view_model.dart';
 import 'app_network_image.dart';
 
-class CustomAppBar extends StatefulWidget
-    implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final SidebarXController controller;
 
   const CustomAppBar({super.key, required this.controller});
 
   @override
-State<CustomAppBar> createState() => _CustomAppBarState();
+  State<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
   Size get preferredSize => Size(double.infinity, 70.sp);
@@ -56,8 +56,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-       context.read<AuthViewModel>().addListener(_authListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      //   await getUser();
+      context.read<AuthViewModel>().addListener(_authListener);
     });
   }
 
@@ -68,6 +69,11 @@ class _CustomAppBarState extends State<CustomAppBar> {
       context.go(LoginScreen.routeName);
     }
   }
+
+  // Future<void> getUser() async {
+  //   userData = await locator<StorageService>().getUser();
+  //   log("USER: ${userData?.name}");
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -139,11 +145,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
           onTap: _onLogoutPressed,
           minLeadingWidth: 40.w,
           title: Text('Logout', style: AppFonts.red14w400),
-          leading: Icon(
-            TablerIcons.logout,
-            color: AppColors.red,
-            size: 24.sp,
-          ),
+          leading: Icon(TablerIcons.logout, color: AppColors.red, size: 24.sp),
         ),
       ],
       child: Card(
@@ -154,39 +156,39 @@ class _CustomAppBarState extends State<CustomAppBar> {
         margin: EdgeInsets.zero,
         child: InkWell(
           onTap: _onAvatarTap,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 4.w),
-              ClipRRect(
-                clipBehavior: Clip.antiAlias,
-                borderRadius: BorderRadius.circular(30.r),
-                child: AppNetworkImage(
-                  width: 32.w,
-                  imageUrl: 'https://picsum.photos/400/400',
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Consumer<AuthViewModel>(
-                builder: (context, authViewModel, _) {
-                  final user = authViewModel.user;
-                  return Column(
+          child: Consumer<AuthViewModel>(
+            builder: (context, authViewModel, _) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(width: 4.w),
+                  ClipRRect(
+                    clipBehavior: Clip.antiAlias,
+                    borderRadius: BorderRadius.circular(30.r),
+                    child: AppNetworkImage(
+                      width: 32.w,
+                      imageUrl: authViewModel.user?.profile?.profileImage ?? "",
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?.name ?? 'N/A',
+                        authViewModel.user?.name?.capitalize ?? 'N/A',
                         style: AppFonts.black14w500,
                       ),
                       Text('Client', style: AppFonts.grey12w400),
                     ],
-                  );
-                },
-              ),
-              SizedBox(width: 12.w),
-              Icon(TablerIcons.chevronDown, size: 24.sp),
-              SizedBox(width: 12.w),
-            ],
+                  ),
+
+                  SizedBox(width: 12.w),
+                  Icon(TablerIcons.chevronDown, size: 24.sp),
+                  SizedBox(width: 12.w),
+                ],
+              );
+            },
           ),
         ),
       ),

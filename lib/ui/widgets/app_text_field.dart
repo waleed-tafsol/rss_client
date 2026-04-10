@@ -11,6 +11,7 @@ class AppTextField extends StatelessWidget {
   final String? hint;
   final bool hide;
   final Widget? suffix;
+  final bool? readOnly;
   const AppTextField({
     super.key,
     this.controller,
@@ -20,6 +21,7 @@ class AppTextField extends StatelessWidget {
     this.hint,
     this.hide = false,
     this.suffix,
+    this.readOnly,
   });
 
   @override
@@ -30,6 +32,7 @@ class AppTextField extends StatelessWidget {
       children: [
         if (showLabel) Text(title, style: AppFonts.black14w400),
         TextFormField(
+          readOnly: readOnly ?? false,
           controller: controller,
           obscureText: hide,
           decoration: InputDecoration(
