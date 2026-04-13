@@ -10,6 +10,7 @@ import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
 import '../view_models/auth_view_model.dart';
 import 'app_gradient_button.dart';
+import 'app_loader.dart';
 import 'app_network_image.dart';
 import 'app_secondary_button.dart';
 import 'app_text_field.dart';
@@ -29,14 +30,22 @@ class _ProfileFormState extends State<ProfileForm> {
   String? image;
 
   @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authVM = context.read<AuthViewModel>();
+      fullNameController.text = authVM.user?.name ?? '';
+      emailController.text = authVM.user?.email ?? '';
+      contactNumberController.text = authVM.user?.profile?.contactNumber ?? '';
+      image = authVM.user?.profile?.profileImage;
+    });
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<AuthViewModel>(
       builder: (context, authVM, _) {
-        fullNameController.text = authVM.user?.name ?? '';
-        emailController.text = authVM.user?.email ?? '';
-        contactNumberController.text =
-            authVM.user?.profile?.contactNumber ?? '';
-        image = authVM.user?.profile?.profileImage;
         return Column(
           crossAxisAlignment: .stretch,
           children: [
@@ -47,7 +56,7 @@ class _ProfileFormState extends State<ProfileForm> {
                   child: authVM.profileImage != null
                       ? (kIsWeb
                             ? Image.network(
-                                authVM.profileImage!,
+                                authVM.profileImage?.path ?? "",
                                 width: 120.w,
                                 height: 120.w,
                                 fit: BoxFit.cover,
@@ -60,7 +69,7 @@ class _ProfileFormState extends State<ProfileForm> {
                                 },
                               )
                             : Image.file(
-                                File(authVM.profileImage!),
+                                File(authVM.profileImage?.path ?? ""),
                                 width: 120.w,
                                 height: 120.w,
                                 fit: BoxFit.cover,
@@ -125,14 +134,33 @@ class _ProfileFormState extends State<ProfileForm> {
               ],
             ),
             SizedBox(height: 16.sp),
-            AppTextField(controller: emailController, title: 'Contact Number'),
+            AppTextField(
+              controller: contactNumberController,
+              title: 'Contact Number',
+            ),
             SizedBox(height: 16.sp),
             Row(
               spacing: 12.w,
               children: [
-                const AppGradientButton(
-                  title: 'Save Changes',
-                  icon: TablerIcons.check,
+                Consumer<AuthViewModel>(
+                  builder: (context, authVM, _) {
+                    if (authVM.loading) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        child: const AppLoader(),
+                      );
+                    }
+                    return AppGradientButton(
+                      title: 'Save Changes',
+                      icon: TablerIcons.check,
+                      onTap: () {
+                        context.read<AuthViewModel>().updateProfile(
+                          name: fullNameController.text,
+                          phone: contactNumberController.text,
+                        );
+                      },
+                    );
+                  },
                 ),
                 AppSecondaryButton(
                   title: 'Cancel',
@@ -143,9 +171,9 @@ class _ProfileFormState extends State<ProfileForm> {
                     contactNumberController.text =
                         authVM.user?.profile?.contactNumber ?? '';
                     image = authVM.user?.profile?.profileImage;
-                      if (mounted) {
-                          authVM.updateProfileImage(null);
-                        }
+                    if (mounted) {
+                      authVM.updateProfileImage(null);
+                    }
                   },
                 ),
               ],

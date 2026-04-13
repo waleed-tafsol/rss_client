@@ -10,11 +10,11 @@ import '../resources/app_fonts.dart';
 import 'app_gradient_button.dart';
 
 class ImageSelectionDialog {
-  static Future<String?> show({
+  static Future<XFile?> show({
     required BuildContext context,
     String? title,
   }) async {
-    return await showDialog<String>(
+    return await showDialog<XFile?>(
       context: context,
       builder: (BuildContext context) {
         return ImageSelectionDialogContent(title: title ?? 'Select Image');
@@ -47,7 +47,7 @@ class _ImageSelectionDialogContentState
       );
 
       if (image != null) {
-        Navigator.of(context).pop(image.path);
+        Navigator.of(context).pop(image);
       }
     } catch (e, s) {
       log('Error picking image: $e', stackTrace: s);

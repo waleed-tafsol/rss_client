@@ -185,6 +185,57 @@ class _AuthApi implements AuthApi {
     return _value;
   }
 
+  @override
+  Future<BaseResponse> updateUser({
+    String? name,
+    String? contactNumber,
+    List<int>? profileImage,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = FormData();
+    if (name != null) {
+      _data.fields.add(MapEntry('name', name));
+    }
+    if (contactNumber != null) {
+      _data.fields.add(MapEntry('contact_number', contactNumber));
+    }
+    if (profileImage != null) {
+      _data.files.add(
+        MapEntry(
+          'profile_image',
+          MultipartFile.fromBytes(profileImage, filename: null),
+        ),
+      );
+    }
+    final _options = _setStreamType<BaseResponse>(
+      Options(
+            method: 'POST',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            '/profile/update',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late BaseResponse _value;
+    try {
+      _value = BaseResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

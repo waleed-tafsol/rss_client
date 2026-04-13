@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../exceptions/app_exception.dart';
 import '../../models/requests/login_request.dart';
@@ -11,9 +12,7 @@ import '../../utils/enums.dart';
 import 'base_view_model.dart';
 
 class AuthViewModel extends BaseViewModel {
-
-
-   AuthViewModel() {
+  AuthViewModel() {
     _hydrate();
   }
 
@@ -24,11 +23,12 @@ class AuthViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
   bool _loading = false;
   User? _user;
   AuthView? _authView = AuthView.login;
   String? _resetToken;
-  String? profileImage;
+  XFile? profileImage;
 
   // Getters
   bool get loading => _loading;
@@ -66,12 +66,9 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-   void updateProfileImage(String? imageBytes) {
-     
-   
-      profileImage = imageBytes;
-      notifyListeners();
-  
+  void updateProfileImage(XFile? imageBytes) {
+    profileImage = imageBytes;
+    notifyListeners();
   }
 
   Timer? _otpTimer;
@@ -168,7 +165,7 @@ class AuthViewModel extends BaseViewModel {
     });
   }
 
-    Future<bool?> getMe() async {
+  Future<bool?> getMe() async {
     return await runSafely(() async {
       final user = await locator<AuthService>().getMe();
       if (user.data != null) {
@@ -178,8 +175,21 @@ class AuthViewModel extends BaseViewModel {
     });
   }
 
-
-
+  Future<void> updateProfile({String? name, String? phone}) async {
+    return await runSafely(() async {
+      setLoading(true);
+      final response = await locator<AuthService>().updateUser(
+        name: name,
+        phone: phone,
+        file: profileImage,
+      );
+      await getMe();
+      _loading = false;
+      profileImage = null;
+      notifyListeners();
+      EasyLoading.showSuccess(response.message ?? 'Profile updated!');
+    });
+  }
 
   Future<void> verifyOtp({required String email, required String otp}) async {
     return await runSafely(() async {

@@ -35,5 +35,11 @@ abstract class AuthApi {
   @GET('/user/me')
   Future<GetMeResponse> getMe();
 
-
+  @MultiPart()
+  @POST('/profile/update')
+  Future<BaseResponse> updateUser({
+    @Part() String? name,
+    @Part(name: 'contact_number') String? contactNumber,
+    @Part(name: 'profile_image') List<int>? profileImage,
+  });
 }

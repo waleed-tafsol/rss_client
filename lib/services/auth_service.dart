@@ -73,4 +73,23 @@ class AuthService {
       throw AppException(response.message ?? 'Something went wrong!');
     }
   }
+
+  Future<BaseResponse> updateUser({
+    required String? name,
+    required String? phone,
+    required XFile? file,
+  }) async {
+    final bytes = await file?.readAsBytes();
+    final response = await locator<AuthApi>().updateUser(
+      name: name,
+      contactNumber: phone,
+      profileImage: bytes,
+    );
+
+    if (!(response.success ?? false)) {
+      throw AppException(response.message ?? 'Something went wrong!');
+    }
+
+    return response;
+  }
 }
