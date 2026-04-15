@@ -37,6 +37,10 @@ class Project {
   final int? status;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final int? propertiesCount;
+  final int? totalInspections;
+  final int? inprogressInspections;
+  
 
   const Project({
     this.id,
@@ -46,6 +50,9 @@ class Project {
     this.status,
     this.createdAt,
     this.updatedAt,
+    this.propertiesCount,
+    this.totalInspections,
+    this.inprogressInspections,
   });
 
   factory Project.fromJson(Map<String, dynamic> json) =>

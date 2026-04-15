@@ -43,6 +43,9 @@ Project _$ProjectFromJson(Map<String, dynamic> json) => Project(
   updatedAt: json['updated_at'] == null
       ? null
       : DateTime.parse(json['updated_at'] as String),
+  propertiesCount: (json['properties_count'] as num?)?.toInt(),
+  totalInspections: (json['total_inspections'] as num?)?.toInt(),
+  inprogressInspections: (json['inprogress_inspections'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$ProjectToJson(Project instance) => <String, dynamic>{
@@ -53,4 +56,7 @@ Map<String, dynamic> _$ProjectToJson(Project instance) => <String, dynamic>{
   'status': instance.status,
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
+  'properties_count': instance.propertiesCount,
+  'total_inspections': instance.totalInspections,
+  'inprogress_inspections': instance.inprogressInspections,
 };

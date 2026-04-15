@@ -205,8 +205,8 @@ class _AuthApi implements AuthApi {
     if (contactNumber != null) {
       _data.fields.add(MapEntry('contact_number', contactNumber));
     }
-    if(profileImage != null){
-    _data.files.add(MapEntry('profile_image', profileImage));
+    if (profileImage != null) {
+      _data.files.add(MapEntry('profile_image', profileImage));
     }
     if (currentPassword != null) {
       _data.fields.add(MapEntry('current_password', currentPassword));
@@ -215,7 +215,7 @@ class _AuthApi implements AuthApi {
       _data.fields.add(MapEntry('password', password));
     }
     if (confirmPassword != null) {
-      _data.fields.add(MapEntry('confirm_password', confirmPassword));
+      _data.fields.add(MapEntry('password_confirmation', confirmPassword));
     }
     final _options = _setStreamType<BaseResponse>(
       Options(

@@ -32,12 +32,18 @@ class _SettingsState extends State<Settings> {
   TextEditingController currentPasswordController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  final _hidecurrentPassword = ValueNotifier(true);
+  final _hideConfrimPassword = ValueNotifier(true);
+  final _hideNewPassword = ValueNotifier(true);
 
   @override
   void dispose() {
     currentPasswordController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
+    _hidecurrentPassword.dispose();
+    _hideConfrimPassword.dispose();
+    _hideNewPassword.dispose();
     super.dispose();
   }
 
@@ -100,30 +106,59 @@ class _SettingsState extends State<Settings> {
       children: [
         Text('Update Password', style: AppFonts.black18w500),
         SizedBox(height: 16.sp),
-        AppTextField(
-          controller: currentPasswordController,
-          title: 'Current Password',
-          validator: Validators.password,
+        ValueListenableBuilder(
+          valueListenable: _hidecurrentPassword,
+          builder: (context, hidePassword, _) {
+            return AppTextField(
+              controller: currentPasswordController,
+              title: 'Current Password',
+              validator: Validators.password,
+              hide: hidePassword,
+              suffix: IconButton(
+                onPressed: () => _hidecurrentPassword.value = !hidePassword,
+                icon: Icon(hidePassword ? TablerIcons.eye : TablerIcons.eyeOff),
+              ),
+            );
+          },
         ),
         SizedBox(height: 16.sp),
-        AppTextField(
-          controller: newPasswordController,
-          title: 'New Password',
-          validator: Validators.password,
+        ValueListenableBuilder(
+          valueListenable: _hideNewPassword,
+          builder: (context, hidePassword, _) {
+            return AppTextField(
+              controller: newPasswordController,
+              title: 'New Password',
+              validator: Validators.password,
+              hide: hidePassword,
+              suffix: IconButton(
+                onPressed: () => _hideNewPassword.value = !hidePassword,
+                icon: Icon(hidePassword ? TablerIcons.eye : TablerIcons.eyeOff),
+              ),
+            );
+          },
         ),
         SizedBox(height: 16.sp),
-        AppTextField(
-          controller: confirmPasswordController,
-          title: 'Confirm New Password',
-          validator: (password) {
-            final result = Validators.password(password);
-            if (result != null) {
-              return result;
-            }
-            if (password != newPasswordController.text.trim()) {
-              return 'Passwords don\'t match!';
-            }
-            return null;
+        ValueListenableBuilder(
+          valueListenable: _hideConfrimPassword,
+          builder: (context, hidePassword, _) {
+            return AppTextField(
+              controller: confirmPasswordController,
+              title: 'Confirm New Password',
+              suffix: IconButton(
+                onPressed: () => _hideConfrimPassword.value = !hidePassword,
+                icon: Icon(hidePassword ? TablerIcons.eye : TablerIcons.eyeOff),
+              ),
+              validator: (password) {
+                final result = Validators.password(password);
+                if (result != null) {
+                  return result;
+                }
+                if (password != newPasswordController.text.trim()) {
+                  return 'Passwords don\'t match!';
+                }
+                return null;
+              },
+            );
           },
         ),
         SizedBox(height: 16.sp),

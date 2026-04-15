@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+
 import '../resources/app_colors.dart';
 import '../resources/app_fonts.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 class AppCustomTable extends StatelessWidget {
   final List<String> columns;
@@ -28,7 +29,8 @@ class AppCustomTable extends StatelessWidget {
     final double totalFlex = flexValues.fold(0, (sum, flex) => sum + flex);
     final double headerHeight = 43.sp;
     final double rowHeight = this.rowHeight ?? 43.sp;
-    final double totalHeight = headerHeight + (rows.length * rowHeight) + 10.sp;
+    final double totalHeight =
+        headerHeight + (rows.length * rowHeight) + (rows.length * 25.h);
 
     return Container(
       height: totalHeight,

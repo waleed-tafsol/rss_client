@@ -43,6 +43,6 @@ abstract class AuthApi {
     @Part(name: 'profile_image')  MultipartFile profileImage,
     @Part(name: 'current_password') String? currentPassword,
     @Part(name: 'password') String? password,
-    @Part(name: 'confirm_password') String? confirmPassword,
+    @Part(name: 'password_confirmation') String? confirmPassword,
   });
 }

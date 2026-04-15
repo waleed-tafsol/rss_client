@@ -3,19 +3,25 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
+import '../../../models/responses/user_history_response.dart';
 import '../../../utils/adaptive_layout_row_column.dart';
 import '../../../utils/context_utils.dart';
+import '../../../utils/date_time_utils.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
 
 import '../../view_models/project_view_model.dart';
+import '../../widgets/app_custom_table.dart';
 import '../../widgets/app_dropdown.dart';
+import '../../widgets/app_expansion_tile.dart';
+import '../../widgets/app_network_image.dart';
 import '../../widgets/number_paginator.dart';
 import '../../../utils/enums.dart';
 import '../../../utils/string_utils.dart';
 
-import '../../widgets/app_table.dart';
+import '../../widgets/status_chip.dart';
 
 class Properties extends StatefulWidget {
   static const String routeName = '/properties';
@@ -29,7 +35,7 @@ class _PropertiesState extends State<Properties> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProjectViewModel>().getProjectList();
+      context.read<ProjectViewModel>().getHistoryProjectList();
     });
 
     super.initState();
@@ -60,14 +66,44 @@ class _PropertiesState extends State<Properties> {
                   Consumer<ProjectViewModel>(
                     builder: (context, projectVM, _) {
                       final loading = projectVM.loading;
-                      final projectList = projectVM.project;
+                      final projectList = projectVM.historyProjectData;
                       if (loading) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (projectVM.project.isEmpty) {
                         return const Center(child: Text('No Data Found'));
                       }
-                      return Expanded(child: AppTable(project: projectList));
+                      return Expanded(
+                        child: ListView.separated(
+                          itemCount: projectList.length,
+                          separatorBuilder: (_, _) => SizedBox(height: 8.h),
+                          itemBuilder: (_, index) {
+                            return AppExpansionTile(
+                              leading: Container(
+                                height: 48.w,
+                                width: 48.w,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primaryLight,
+                                ),
+                                child: Icon(
+                                  TablerIcons.mapPin,
+                                  size: 24.sp,
+                                  color: AppColors.primaryDark,
+                                ),
+                              ),
+                              title: projectList[index]?.name ?? 'N/A',
+                              subtitle:
+                                  '${projectList[index]?.propertiesCount} Properties',
+                              actions: const [],
+                              child: _buildTable(
+                                projectList[index]?.properties ?? [],
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                      
                     },
                   ),
                   _buildFooter(),
@@ -80,21 +116,71 @@ class _PropertiesState extends State<Properties> {
     );
   }
 
-  Row _buildFooter() {
-    return Row(
-      mainAxisAlignment: .spaceBetween,
-      children: [
-        Text('Showing Results 1-11', style: AppFonts.grey14w400),
-        NumberPaginator(
-          totalPages: 10,
-          currentPage: _currentPage,
-          onPageChanged: (page) {
-            setState(() {
-              _currentPage = page;
-            });
-          },
-        ),
-      ],
+  AppCustomTable _buildTable(List<Property> properties) {
+    return AppCustomTable(
+      columns: const ['URPN', 'Address', 'Client', 'Status', 'Date', ''],
+      rows: List.generate(properties.length, (rIndex) {
+        return List.generate(6, (cIndex) {
+          final property = properties[rIndex];
+          return switch (cIndex) {
+            0 => Text(property.uprn ?? 'N/A', style: AppFonts.black14w400),
+            1 => Text(property.address1 ?? 'N/A', style: AppFonts.black14w400),
+            2 => Row(
+              spacing: 8.w,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(30.r),
+                  child: AppNetworkImage(
+                    imageUrl: 'https://picsum.photos/400/400',
+                    width: 24.w,
+                    height: 24.w,
+                  ),
+                ),
+                Text(property.tenantName ?? 'N/A', style: AppFonts.black14w400),
+              ],
+            ),
+            3 => const StatusChip(status: InspectionStatus.completed),
+            4 => Text(
+              property.date?.toLongDate ?? 'N/A',
+              style: AppFonts.black14w400,
+            ),
+            5 => IconButton(
+              onPressed: () {},
+              icon: Icon(TablerIcons.dots, size: 24.sp),
+            ),
+            int() => throw UnimplementedError(),
+          };
+        });
+      }),
+      flexValues: [90.w, 180.w, 200.w, 180.w, 150.w, 70.w],
+    );
+  }
+
+  Widget _buildFooter() {
+    return Consumer<ProjectViewModel>(
+      builder: (context, projectVM, _) {
+        return Row(
+          mainAxisAlignment: .spaceBetween,
+          children: [
+            Text(
+              'Showing Results ${_currentPage + 1}-${projectVM.totalPages}',
+              style: AppFonts.grey14w400,
+            ),
+            NumberPaginator(
+              totalPages: projectVM.page,
+              currentPage: _currentPage,
+              onPageChanged: (page) {
+                final changepage = page + 1;
+                projectVM.setPage(changepage);
+                projectVM.getProjectList();
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
