@@ -189,7 +189,7 @@ class _AuthApi implements AuthApi {
   Future<BaseResponse> updateUser({
     String? name,
     String? contactNumber,
-    List<int>? profileImage,
+    MultipartFile? profileImage,
     String? currentPassword,
     String? password,
     String? confirmPassword,
@@ -205,13 +205,8 @@ class _AuthApi implements AuthApi {
     if (contactNumber != null) {
       _data.fields.add(MapEntry('contact_number', contactNumber));
     }
-    if (profileImage != null) {
-      _data.files.add(
-        MapEntry(
-          'profile_image',
-          MultipartFile.fromBytes(profileImage, filename: null),
-        ),
-      );
+    if(profileImage != null){
+    _data.files.add(MapEntry('profile_image', profileImage));
     }
     if (currentPassword != null) {
       _data.fields.add(MapEntry('current_password', currentPassword));

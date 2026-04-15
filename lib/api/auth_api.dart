@@ -40,7 +40,7 @@ abstract class AuthApi {
   Future<BaseResponse> updateUser({
     @Part() String? name,
     @Part(name: 'contact_number') String? contactNumber,
-    @Part(name: 'profile_image') List<int>? profileImage,
+    @Part(name: 'profile_image')  MultipartFile profileImage,
     @Part(name: 'current_password') String? currentPassword,
     @Part(name: 'password') String? password,
     @Part(name: 'confirm_password') String? confirmPassword,

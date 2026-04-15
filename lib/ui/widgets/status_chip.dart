@@ -29,9 +29,13 @@ class StatusChip extends StatelessWidget {
             ),
           ),
           SizedBox(width: 4.w),
-          Text(
-            status.label,
-            style: AppFonts.black12w400.copyWith(color: status.fontColor),
+          Flexible(
+            child: Text(
+              status.label,
+              style: AppFonts.black12w400.copyWith(color: status.fontColor),
+              overflow: .ellipsis,
+              maxLines: 1,
+            ),
           ),
         ],
       ),

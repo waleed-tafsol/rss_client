@@ -82,20 +82,38 @@ class AuthService {
     String? currentPassword,
     String? confirmPassword,
   }) async {
-    final bytes = await file?.readAsBytes();
-    final response = await locator<AuthApi>().updateUser(
-      name: name,
-      contactNumber: phone,
-      profileImage: bytes,
-      currentPassword: currentPassword,
-      confirmPassword: confirmPassword,
-      password: newPassword,
-    );
+    if (file != null) {
+      final bytes = await file?.readAsBytes();
+      final multipartFile = MultipartFile.fromBytes(
+        bytes!,
+        filename: 'profile_image',
+      );
+      final response = await locator<AuthApi>().updateUser(
+        name: name,
+        contactNumber: phone,
+        profileImage: multipartFile,
+        currentPassword: currentPassword,
+        confirmPassword: confirmPassword,
+        password: newPassword,
+      );
+      if (!(response.success ?? false)) {
+        throw AppException(response.message ?? 'Something went wrong!');
+      }
 
-    if (!(response.success ?? false)) {
-      throw AppException(response.message ?? 'Something went wrong!');
+      return response;
+    } else {
+      final response = await locator<AuthApi>().updateUser(
+        name: name,
+        contactNumber: phone,
+        currentPassword: currentPassword,
+        confirmPassword: confirmPassword,
+        password: newPassword,
+      );
+      if (!(response.success ?? false)) {
+        throw AppException(response.message ?? 'Something went wrong!');
+      }
+
+      return response;
     }
-
-    return response;
   }
 }
