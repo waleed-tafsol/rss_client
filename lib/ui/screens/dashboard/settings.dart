@@ -1,21 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
 import '../../../utils/enums.dart';
 import '../../../utils/string_utils.dart';
+import '../../../utils/validators.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
+import '../../view_models/app_view_model.dart';
+import '../../view_models/auth_view_model.dart';
 import '../../view_models/settings_view_model.dart';
 import '../../widgets/app_gradient_button.dart';
+import '../../widgets/app_loader.dart';
 import '../../widgets/app_secondary_button.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/profile_form.dart';
+import '../login_screen.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
   static const String routeName = '/settings';
   const Settings({super.key});
+
+  @override
+  State<Settings> createState() => _SettingsState();
+}
+
+class _SettingsState extends State<Settings> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController currentPasswordController = TextEditingController();
+  TextEditingController newPasswordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    currentPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +81,10 @@ class Settings extends StatelessWidget {
                 padding: EdgeInsets.all(16.w),
                 child: switch (settingsType) {
                   SettingsType.profile => const ProfileForm(),
-                  SettingsType.password => _buildPasswordView(),
+                  SettingsType.password => Form(
+                    key: _formKey,
+                    child: _buildPasswordView(),
+                  ),
                 },
               ),
             ),
@@ -73,20 +100,83 @@ class Settings extends StatelessWidget {
       children: [
         Text('Update Password', style: AppFonts.black18w500),
         SizedBox(height: 16.sp),
-        const AppTextField(title: 'Current Password'),
+        AppTextField(
+          controller: currentPasswordController,
+          title: 'Current Password',
+          validator: Validators.password,
+        ),
         SizedBox(height: 16.sp),
-        const AppTextField(title: 'New Password'),
+        AppTextField(
+          controller: newPasswordController,
+          title: 'New Password',
+          validator: Validators.password,
+        ),
         SizedBox(height: 16.sp),
-        const AppTextField(title: 'Confirm New Password'),
+        AppTextField(
+          controller: confirmPasswordController,
+          title: 'Confirm New Password',
+          validator: (password) {
+            final result = Validators.password(password);
+            if (result != null) {
+              return result;
+            }
+            if (password != newPasswordController.text.trim()) {
+              return 'Passwords don\'t match!';
+            }
+            return null;
+          },
+        ),
         SizedBox(height: 16.sp),
         Row(
           children: [
-            const AppGradientButton(
-              title: 'Update Password',
-              icon: TablerIcons.check,
+            Consumer<AuthViewModel>(
+              builder: (context, authVM, _) {
+                if (authVM.loading) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: const AppLoader(),
+                  );
+                }
+                return AppGradientButton(
+                  title: 'Update Password',
+                  icon: TablerIcons.check,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      authVM
+                          .updateProfile(
+                            currentPassword: currentPasswordController.text,
+                            newPassword: newPasswordController.text,
+                            confirmPassword: confirmPasswordController.text,
+                          )
+                          .then((value) async {
+                            if (value == true) {
+                              await context.read<AuthViewModel>().logout().then(
+                                (value) {
+                                  if (authVM.user == null) {
+                                    context.read<AppViewModel>().setIsLoggedIn(
+                                      false,
+                                    );
+                                    context.go(LoginScreen.routeName);
+                                  }
+                                },
+                              );
+                            }
+                          });
+                    }
+                  },
+                );
+              },
             ),
             SizedBox(width: 12.sp),
-            const AppSecondaryButton(title: 'Cancel', icon: TablerIcons.x),
+            AppSecondaryButton(
+              title: 'Cancel',
+              icon: TablerIcons.x,
+              onTap: () {
+                currentPasswordController.clear();
+                newPasswordController.clear();
+                confirmPasswordController.clear();
+              },
+            ),
           ],
         ),
       ],

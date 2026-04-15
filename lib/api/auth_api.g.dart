@@ -190,6 +190,9 @@ class _AuthApi implements AuthApi {
     String? name,
     String? contactNumber,
     List<int>? profileImage,
+    String? currentPassword,
+    String? password,
+    String? confirmPassword,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -209,6 +212,15 @@ class _AuthApi implements AuthApi {
           MultipartFile.fromBytes(profileImage, filename: null),
         ),
       );
+    }
+    if (currentPassword != null) {
+      _data.fields.add(MapEntry('current_password', currentPassword));
+    }
+    if (password != null) {
+      _data.fields.add(MapEntry('password', password));
+    }
+    if (confirmPassword != null) {
+      _data.fields.add(MapEntry('confirm_password', confirmPassword));
     }
     final _options = _setStreamType<BaseResponse>(
       Options(

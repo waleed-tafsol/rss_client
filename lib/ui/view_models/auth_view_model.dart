@@ -129,13 +129,14 @@ class AuthViewModel extends BaseViewModel {
     });
   }
 
-  Future<void> logout() async {
+  Future<bool?> logout() async {
     return await runSafely(() async {
       EasyLoading.show(status: 'Logging out...');
       await locator<AuthService>().logout();
       _user = null;
       notifyListeners();
       EasyLoading.dismiss();
+      return true;
     });
   }
 
@@ -175,19 +176,23 @@ class AuthViewModel extends BaseViewModel {
     });
   }
 
-  Future<void> updateProfile({String? name, String? phone}) async {
+  Future<bool?> updateProfile({String? name, String? phone,String? newPassword,String? currentPassword, String? confirmPassword}) async {
     return await runSafely(() async {
       setLoading(true);
       final response = await locator<AuthService>().updateUser(
         name: name,
         phone: phone,
         file: profileImage,
+        newPassword: newPassword,
+        currentPassword: currentPassword,
+        confirmPassword: confirmPassword,
       );
       await getMe();
       _loading = false;
       profileImage = null;
       notifyListeners();
       EasyLoading.showSuccess(response.message ?? 'Profile updated!');
+      return true;
     });
   }
 

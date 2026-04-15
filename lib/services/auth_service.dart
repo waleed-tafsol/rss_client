@@ -78,12 +78,18 @@ class AuthService {
     required String? name,
     required String? phone,
     required XFile? file,
+    String? newPassword,
+    String? currentPassword,
+    String? confirmPassword,
   }) async {
     final bytes = await file?.readAsBytes();
     final response = await locator<AuthApi>().updateUser(
       name: name,
       contactNumber: phone,
       profileImage: bytes,
+      currentPassword: currentPassword,
+      confirmPassword: confirmPassword,
+      password: newPassword,
     );
 
     if (!(response.success ?? false)) {
