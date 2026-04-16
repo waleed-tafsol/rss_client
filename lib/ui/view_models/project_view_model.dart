@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../models/responses/project_list_response.dart';
 import '../../models/responses/user_history_response.dart';
 import '../../services/locator.dart';
@@ -39,9 +41,9 @@ class ProjectViewModel extends BaseViewModel {
       setLoading(true);
       final projectListResponse = await locator<ProjectService>()
           .getUserHistory();
-      if (projectListResponse.isEmpty) {
-        historyProjectData = projectListResponse ;
-       
+      if (projectListResponse.isNotEmpty) {
+        historyProjectData = projectListResponse;
+        log("historyData List ----------${historyProjectData}");
       }
       setLoading(false);
     });

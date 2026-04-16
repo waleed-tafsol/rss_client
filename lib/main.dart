@@ -13,7 +13,6 @@ import 'ui/view_models/app_view_model.dart';
 import 'ui/view_models/auth_view_model.dart';
 import 'ui/view_models/settings_view_model.dart';
 import 'ui/view_models/theme_view_model.dart';
-import 'ui/view_models/crud_view_model.dart';
 import 'ui/view_models/project_view_model.dart';
 
 Future<void> main() async {
@@ -28,7 +27,6 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()..init()),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
-        ChangeNotifierProvider(create: (_) => CrudViewModel()),
         ChangeNotifierProvider(create: (_) => ProjectViewModel()),
       ],
       child: const RssClient(),

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
@@ -22,6 +23,7 @@ import '../../../utils/enums.dart';
 import '../../../utils/string_utils.dart';
 
 import '../../widgets/status_chip.dart';
+import 'property_detail.dart';
 
 class Properties extends StatefulWidget {
   static const String routeName = '/properties';
@@ -32,6 +34,8 @@ class Properties extends StatefulWidget {
 }
 
 class _PropertiesState extends State<Properties> {
+
+   final controller = MenuController();
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -52,6 +56,7 @@ class _PropertiesState extends State<Properties> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -70,7 +75,7 @@ class _PropertiesState extends State<Properties> {
                       if (loading) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      if (projectVM.project.isEmpty) {
+                      if (projectList.isEmpty) {
                         return const Center(child: Text('No Data Found'));
                       }
                       return Expanded(
@@ -103,7 +108,6 @@ class _PropertiesState extends State<Properties> {
                           },
                         ),
                       );
-                      
                     },
                   ),
                   _buildFooter(),
@@ -144,10 +148,53 @@ class _PropertiesState extends State<Properties> {
               property.date?.toLongDate ?? 'N/A',
               style: AppFonts.black14w400,
             ),
-            5 => IconButton(
-              onPressed: () {},
-              icon: Icon(TablerIcons.dots, size: 24.sp),
+            5 => MenuAnchor(
+              controller: controller,
+
+              menuChildren: [
+                ListTile(
+                  onTap: () {
+                    context.goNamed(PropertyDetail.routeName);
+                  },
+                  leading: Icon(TablerIcons.eye, size: 24.sp),
+                  horizontalTitleGap: 16.w,
+                  minLeadingWidth: 24.sp,
+                  title: Text('View Details', style: AppFonts.grey14w400),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(TablerIcons.pencil, size: 24.sp),
+                  horizontalTitleGap: 16.w,
+                  minLeadingWidth: 24.sp,
+                  title: Text('Edit', style: AppFonts.grey14w400),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                ListTile(
+                  onTap: () {},
+                  leading: Icon(
+                    TablerIcons.ban,
+                    size: 24.sp,
+                    color: AppColors.red,
+                  ),
+                  horizontalTitleGap: 16.w,
+                  minLeadingWidth: 24.sp,
+                  title: Text('Disable', style: AppFonts.grey14w400),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ],
+              child: IconButton(
+                onPressed: () {
+                  if (!controller.isOpen) {
+                    controller.open();
+                  } else {
+                    controller.close();
+                  }
+                },
+                icon: Icon(TablerIcons.dots, size: 24.sp),
+              ),
             ),
+          
             int() => throw UnimplementedError(),
           };
         });

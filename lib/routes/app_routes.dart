@@ -5,13 +5,11 @@ import '../services/locator.dart';
 import '../ui/screens/dashboard/dashboard.dart';
 import '../ui/screens/dashboard/notification.dart';
 import '../ui/screens/dashboard/overview_screen.dart';
-import '../ui/screens/dashboard/project_detail.dart';
-import '../ui/screens/dashboard/project_management.dart';
+
 import '../ui/screens/dashboard/properties.dart';
-import '../ui/screens/dashboard/property_creation.dart';
+
 import '../ui/screens/dashboard/property_detail.dart';
 import '../ui/screens/dashboard/settings.dart';
-import '../ui/screens/dashboard/surveyors_analytics.dart';
 import '../ui/screens/login_screen.dart';
 import '../ui/screens/splash_screen.dart';
 
@@ -52,46 +50,21 @@ class AppRoutes {
             builder: (_, _) => const Properties(),
           ),
           GoRoute(
-            path: ProjectManagement.routeName,
-            name: ProjectManagement.routeName,
-            builder: (_, _) => const ProjectManagement(),
-            routes: [
-              GoRoute(
-                path: ProjectDetail.routeName,
-                name: ProjectDetail.routeName,
-                builder: (_, _) => const ProjectDetail(),
-                routes: [
-                  GoRoute(
-                    path: PropertyCreation.routeName,
-                    name: PropertyCreation.routeName,
-                    builder: (_, _) => const PropertyCreation(),
-                  ),
-                  GoRoute(
-                    path: PropertyDetail.routeName,
-                    name: PropertyDetail.routeName,
-                    builder: (_, _) => PropertyDetail(),
-                  ),
-                ],
-              ),
-             
-            ],
+            path: PropertyDetail.routeName,
+            name: PropertyDetail.routeName,
+            builder: (_, _) => PropertyDetail(),
           ),
-          GoRoute(
-            path: SurveyorsAnalytics.routeName,
-            name: SurveyorsAnalytics.routeName,
-            builder: (_, _) => const SurveyorsAnalytics(),
-          ),
+
           GoRoute(
             path: Settings.routeName,
             name: Settings.routeName,
             builder: (_, _) => const Settings(),
           ),
-           GoRoute(
-                path: Notifications.routeName,
-                name: Notifications.routeName,
-                builder: (_, _) => const Notifications(),
-              ),
-      
+          GoRoute(
+            path: Notifications.routeName,
+            name: Notifications.routeName,
+            builder: (_, _) => const Notifications(),
+          ),
         ],
       ),
     ],

@@ -246,38 +246,38 @@ class _OverViewScreenState extends State<OverViewScreen> {
                     if (loading) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    if (projectVM.project.isEmpty) {
+                    if (projectList.isEmpty) {
                       return const Center(child: Text('No Data Found'));
                     }
-                    return Expanded(
-                      child: ListView.separated(
-                        itemCount: projectList.length,
-                        separatorBuilder: (_, _) => SizedBox(height: 8.h),
-                        itemBuilder: (_, index) {
-                          return AppExpansionTile(
-                            leading: Container(
-                              height: 48.w,
-                              width: 48.w,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppColors.primaryLight,
-                              ),
-                              child: Icon(
-                                TablerIcons.mapPin,
-                                size: 24.sp,
-                                color: AppColors.primaryDark,
-                              ),
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: projectList.length,
+                      separatorBuilder: (_, _) => SizedBox(height: 8.h),
+                      itemBuilder: (_, index) {
+                        return AppExpansionTile(
+                          leading: Container(
+                            height: 48.w,
+                            width: 48.w,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primaryLight,
                             ),
-                            title: projectList[index]?.name ?? 'N/A',
-                            subtitle:
-                                '${projectList[index]?.propertiesCount} Properties',
-                            actions: const [],
-                            child: _buildTable(
-                              projectList[index]?.properties ?? [],
+                            child: Icon(
+                              TablerIcons.mapPin,
+                              size: 24.sp,
+                              color: AppColors.primaryDark,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                          title: projectList[index]?.name ?? 'N/A',
+                          subtitle:
+                              '${projectList[index]?.propertiesCount} Properties',
+                          actions: const [],
+                          child: _buildTable(
+                            projectList[index]?.properties ?? [],
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -323,7 +323,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
               menuChildren: [
                 ListTile(
                   onTap: () {
-                     context.goNamed(PropertyDetail.routeName);
+                    context.goNamed(PropertyDetail.routeName);
                   },
                   leading: Icon(TablerIcons.eye, size: 24.sp),
                   horizontalTitleGap: 16.w,
