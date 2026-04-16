@@ -34,8 +34,7 @@ class Properties extends StatefulWidget {
 }
 
 class _PropertiesState extends State<Properties> {
-
-   final controller = MenuController();
+  final controller = MenuController();
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -56,7 +55,6 @@ class _PropertiesState extends State<Properties> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,7 +95,8 @@ class _PropertiesState extends State<Properties> {
                                   color: AppColors.primaryDark,
                                 ),
                               ),
-                              title: projectList[index]?.name ?? 'N/A',
+                              title:
+                                  projectList[index]?.name?.capitalize ?? 'N/A',
                               subtitle:
                                   '${projectList[index]?.propertiesCount} Properties',
                               actions: const [],
@@ -140,7 +139,10 @@ class _PropertiesState extends State<Properties> {
                     height: 24.w,
                   ),
                 ),
-                Text(property.tenantName ?? 'N/A', style: AppFonts.black14w400),
+                Text(
+                  property.tenantName?.capitalize ?? 'N/A',
+                  style: AppFonts.black14w400,
+                ),
               ],
             ),
             3 => const StatusChip(status: InspectionStatus.completed),
@@ -194,7 +196,7 @@ class _PropertiesState extends State<Properties> {
                 icon: Icon(TablerIcons.dots, size: 24.sp),
               ),
             ),
-          
+
             int() => throw UnimplementedError(),
           };
         });

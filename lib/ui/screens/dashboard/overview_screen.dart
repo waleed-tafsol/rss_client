@@ -6,6 +6,7 @@ import '../../../models/responses/user_history_response.dart';
 import '../../../utils/adaptive_layout_row_column.dart';
 import '../../../utils/context_utils.dart';
 import '../../../utils/date_time_utils.dart';
+import '../../../utils/string_utils.dart';
 import '../../view_models/project_view_model.dart';
 import '../../../utils/enums.dart';
 import 'package:provider/provider.dart';
@@ -269,7 +270,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
                               color: AppColors.primaryDark,
                             ),
                           ),
-                          title: projectList[index]?.name ?? 'N/A',
+                          title: projectList[index]?.name?.capitalize ?? 'N/A',
                           subtitle:
                               '${projectList[index]?.propertiesCount} Properties',
                           actions: const [],
@@ -309,7 +310,10 @@ class _OverViewScreenState extends State<OverViewScreen> {
                     height: 24.w,
                   ),
                 ),
-                Text(property.tenantName ?? 'N/A', style: AppFonts.black14w400),
+                Text(
+                  property.tenantName?.capitalize ?? 'N/A',
+                  style: AppFonts.black14w400,
+                ),
               ],
             ),
             3 => const StatusChip(status: InspectionStatus.completed),
