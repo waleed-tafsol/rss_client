@@ -12,4 +12,7 @@ extension DateTimeUtils on DateTime {
     String get toLongDate {
     return DateFormat('MMMM dd, yyyy').format(this);
   }
+   String toFormattedDate() {
+    return DateFormat('MMM dd, yyyy').format(this);
+  }
 }

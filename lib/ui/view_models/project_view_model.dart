@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import '../../models/responses/project_list_response.dart';
+import '../../models/responses/property_detail_response.dart';
 import '../../models/responses/user_history_response.dart';
 import '../../services/locator.dart';
 import 'base_view_model.dart';
@@ -13,6 +12,7 @@ class ProjectViewModel extends BaseViewModel {
   bool loading = false;
 
   List<HistoryData?> historyProjectData = [];
+  PropertyDetailResponse propertyDetailData = PropertyDetailResponse();
 
   void setLoading(bool value) {
     loading = value;
@@ -21,6 +21,15 @@ class ProjectViewModel extends BaseViewModel {
 
   void setPage(int value) {
     page = value;
+  }
+
+  int? _selectedPropertyId;
+  int? get selectedPropertyId => _selectedPropertyId;
+
+  void setSelectedPropertyId(int? value) {
+    _selectedPropertyId = value;
+    locator<StorageService>().saveSelectedPropertyId(value?.toString());
+    notifyListeners();
   }
 
   Future<void> getProjectList() async {
@@ -43,7 +52,19 @@ class ProjectViewModel extends BaseViewModel {
           .getUserHistory();
       if (projectListResponse.isNotEmpty) {
         historyProjectData = projectListResponse;
-        log("historyData List ----------${historyProjectData}");
+      }
+      setLoading(false);
+    });
+  }
+
+  Future<void> getPropertyDetail() async {
+    return await runSafely(() async {
+      setLoading(true);
+      final propertDetail = await locator<ProjectService>().getPropertyDetail(
+        id: _selectedPropertyId ?? 0,
+      );
+      if (propertDetail.success!) {
+        propertyDetailData = propertDetail;
       }
       setLoading(false);
     });

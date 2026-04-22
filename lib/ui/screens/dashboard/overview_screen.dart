@@ -148,7 +148,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
                 Row(
                   mainAxisSize: .max,
                   children: [
-                    const StatusChip(status: InspectionStatus.inProgress),
+                    const StatusChip(status: Status.inprogress),
                     SizedBox(width: 16.w),
                     const Expanded(
                       child: Divider(color: AppColors.lightGrey2, height: 0),
@@ -215,9 +215,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
                               crossAxisAlignment: .start,
                               children: [
                                 Text('Status', style: AppFonts.grey14w400),
-                                const StatusChip(
-                                  status: InspectionStatus.inProgress,
-                                ),
+                                const StatusChip(status: Status.inprogress),
                               ],
                             ),
                           ),
@@ -231,7 +229,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
-                    const StatusChip(status: InspectionStatus.completed),
+                    const StatusChip(status: Status.completed),
                     SizedBox(width: 16.w),
                     const Expanded(
                       child: Divider(color: AppColors.lightGrey2, height: 0),
@@ -298,7 +296,7 @@ class _OverViewScreenState extends State<OverViewScreen> {
           final property = properties[rIndex];
           return switch (cIndex) {
             0 => Text(property.uprn ?? 'N/A', style: AppFonts.black14w400),
-            1 => Text(property.address1 ?? 'N/A', style: AppFonts.black14w400),
+            1 => Text(property.address ?? 'N/A', style: AppFonts.black14w400),
             2 => Row(
               spacing: 8.w,
               children: [
@@ -316,57 +314,12 @@ class _OverViewScreenState extends State<OverViewScreen> {
                 ),
               ],
             ),
-            3 => const StatusChip(status: InspectionStatus.completed),
+            3 => const StatusChip(status: Status.completed),
             4 => Text(
               property.date?.toLongDate ?? 'N/A',
               style: AppFonts.black14w400,
             ),
-            5 => MenuAnchor(
-              controller: controller,
-
-              menuChildren: [
-                ListTile(
-                  onTap: () {
-                    context.goNamed(PropertyDetail.routeName);
-                  },
-                  leading: Icon(TablerIcons.eye, size: 24.sp),
-                  horizontalTitleGap: 16.w,
-                  minLeadingWidth: 24.sp,
-                  title: Text('View Details', style: AppFonts.grey14w400),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                ListTile(
-                  onTap: () {},
-                  leading: Icon(TablerIcons.pencil, size: 24.sp),
-                  horizontalTitleGap: 16.w,
-                  minLeadingWidth: 24.sp,
-                  title: Text('Edit', style: AppFonts.grey14w400),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                ListTile(
-                  onTap: () {},
-                  leading: Icon(
-                    TablerIcons.ban,
-                    size: 24.sp,
-                    color: AppColors.red,
-                  ),
-                  horizontalTitleGap: 16.w,
-                  minLeadingWidth: 24.sp,
-                  title: Text('Disable', style: AppFonts.grey14w400),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ],
-              child: IconButton(
-                onPressed: () {
-                  if (!controller.isOpen) {
-                    controller.open();
-                  } else {
-                    controller.close();
-                  }
-                },
-                icon: Icon(TablerIcons.dots, size: 24.sp),
-              ),
-            ),
+            5 => MyMenuWidget(propertyId: property.id.toString()),
             int() => throw UnimplementedError(),
           };
         });
@@ -517,4 +470,66 @@ Widget _buildProgressBar() {
       ),
     ],
   );
+}
+
+class MyMenuWidget extends StatefulWidget {
+  final String propertyId;
+  const MyMenuWidget({super.key, required this.propertyId});
+
+  @override
+  State<MyMenuWidget> createState() => _MyMenuWidgetState();
+}
+
+class _MyMenuWidgetState extends State<MyMenuWidget> {
+  final MenuController _controller = MenuController();
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      controller: _controller,
+      menuChildren: [
+        ListTile(
+          onTap: () {
+            final projectVM = context.read<ProjectViewModel>();
+            _controller.close();
+            projectVM.setSelectedPropertyId(int.parse(widget.propertyId));
+            context.goNamed(
+              PropertyDetail.routeName,
+              extra: int.parse(widget.propertyId),
+            );
+          },
+          leading: Icon(TablerIcons.eye, size: 24.sp),
+          horizontalTitleGap: 16.w,
+          minLeadingWidth: 24.sp,
+          title: Text('View Details', style: AppFonts.grey14w400),
+          contentPadding: EdgeInsets.zero,
+        ),
+        // ListTile(
+        //   onTap: () {
+        //     context.read<ProjectViewModel>().callDeleteProperty(
+        //       id: widget.propertyId,
+        //     );
+        //     _controller.close();
+        //   },
+        //   leading: Icon(TablerIcons.trash, size: 24.sp, color: AppColors.red),
+        //   horizontalTitleGap: 16.w,
+        //   minLeadingWidth: 24.sp,
+        //   title: Text('Detele', style: AppFonts.grey14w400),
+        //   contentPadding: EdgeInsets.zero,
+        // ),
+      ],
+      builder: (context, controller, child) {
+        return IconButton(
+          icon: Icon(TablerIcons.dots, size: 16.sp),
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+        );
+      },
+    );
+  }
 }

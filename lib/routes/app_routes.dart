@@ -52,7 +52,7 @@ class AppRoutes {
           GoRoute(
             path: PropertyDetail.routeName,
             name: PropertyDetail.routeName,
-            builder: (_, _) => PropertyDetail(),
+            builder: (_, _) => const PropertyDetail(),
           ),
 
           GoRoute(

@@ -54,7 +54,8 @@ class HistoryData {
 class Property {
   final int? id;
   final String? uprn;
-  final String? address1;
+  final String? address;
+  final String? clientName;
   final DateTime? date;
   final int? tenantId;
   final int? surveyorId;
@@ -65,13 +66,14 @@ class Property {
   Property({
     this.id,
     this.uprn,
-    this.address1,
+    this.address,
     this.date,
     this.tenantId,
     this.surveyorId,
     this.checklistDetails,
     this.tenantName,
     this.surveyorName,
+    this.clientName
   });
 
   factory Property.fromJson(Map<String, dynamic> json) =>

@@ -61,19 +61,21 @@ Map<String, dynamic> _$HistoryDataToJson(HistoryData instance) =>
 Property _$PropertyFromJson(Map<String, dynamic> json) => Property(
   id: (json['id'] as num?)?.toInt(),
   uprn: json['uprn'] as String?,
-  address1: json['address1'] as String?,
+  address: json['address'] as String?,
   date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
   tenantId: (json['tenant_id'] as num?)?.toInt(),
   surveyorId: (json['surveyor_id'] as num?)?.toInt(),
   checklistDetails: json['checklist_details'] as List<dynamic>?,
   tenantName: json['tenant_name'] as String?,
   surveyorName: json['surveyor_name'] as String?,
+  clientName: json['client_name'] as String?,
 );
 
 Map<String, dynamic> _$PropertyToJson(Property instance) => <String, dynamic>{
   'id': instance.id,
   'uprn': instance.uprn,
-  'address1': instance.address1,
+  'address': instance.address,
+  'client_name': instance.clientName,
   'date': instance.date?.toIso8601String(),
   'tenant_id': instance.tenantId,
   'surveyor_id': instance.surveyorId,

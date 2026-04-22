@@ -8,6 +8,8 @@ class StorageService {
   static const String _themeModeKey = 'theme-mode';
   static const String _accessTokenKey = 'access-token';
   static const String _userKey = 'user-key';
+  //static const String _selectedProjectIdKey = 'selected-project-id';
+  static const String _selectedPropertyIdKey = 'selected-property-id';
 
   Future<void> saveTheme(ThemeMode themeMode) async {
     await _storage.write(key: _themeModeKey, value: themeMode.name);
@@ -26,6 +28,14 @@ class StorageService {
       return;
     }
     await _storage.write(key: _accessTokenKey, value: accessToken);
+  }
+
+  Future<void> saveSelectedPropertyId(String? id) async {
+    if (id == null) {
+      await _storage.delete(key: _selectedPropertyIdKey);
+    } else {
+      await _storage.write(key: _selectedPropertyIdKey, value: id);
+    }
   }
 
   Future<String?> getAccessToken() async {

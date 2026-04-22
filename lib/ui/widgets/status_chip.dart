@@ -5,7 +5,7 @@ import '../resources/app_fonts.dart';
 import '../../utils/inspection_status.dart';
 
 class StatusChip extends StatelessWidget {
-  final InspectionStatus status;
+  final Status status;
   final String? title;
   const StatusChip({super.key, required this.status, this.title});
 

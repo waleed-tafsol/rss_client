@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
+import '../../../models/responses/property_detail_response.dart';
 import '../../../utils/adaptive_layout_row_column.dart';
 import '../../../utils/context_utils.dart';
+import '../../../utils/date_time_utils.dart';
+import '../../../utils/string_utils.dart';
 import '../../resources/app_colors.dart';
 import '../../resources/app_fonts.dart';
+import '../../view_models/project_view_model.dart';
 import '../../widgets/status_chip.dart';
 import '../../../utils/enums.dart';
 import '../../../utils/inspection_status.dart';
 import '../../../utils/property_detail_filter.dart';
 import 'package:tabler_icons_plus/tabler_icons_plus.dart';
 
-class PropertyDetail extends StatelessWidget {
+class PropertyDetail extends StatefulWidget {
   static const String routeName = '/property-detail';
-  PropertyDetail({super.key});
+  const PropertyDetail({super.key});
+
+  @override
+  State<PropertyDetail> createState() => _PropertyDetailState();
+}
+
+class _PropertyDetailState extends State<PropertyDetail> {
   final ValueNotifier<PropertyDetailFilter> selectedFilter = ValueNotifier(
     PropertyDetailFilter.modulesOverview,
   );
@@ -25,238 +36,482 @@ class PropertyDetail extends StatelessWidget {
   ];
 
   List<ProgressData> progressDataList = [
-    ProgressData(
-      title: "Stock",
-      progress: 0.8,
-      status: InspectionStatus.inProgress,
-    ),
-    ProgressData(
-      title: "Attributes",
-      progress: 1.0,
-      status: InspectionStatus.completed,
-    ),
-    ProgressData(
-      title: "Windows",
-      progress: 0.5,
-      status: InspectionStatus.inProgress,
-    ),
-    ProgressData(
-      title: "D&M Survey",
-      progress: 0.2,
-      status: InspectionStatus.upcoming,
-    ),
-    ProgressData(
-      title: "Repairs",
-      progress: 0.9,
-      status: InspectionStatus.inProgress,
-    ),
-    ProgressData(
-      title: "HHSRS",
-      progress: 1.0,
-      status: InspectionStatus.completed,
-    ),
+    ProgressData(title: "Stock", progress: 0.8, status: Status.inprogress),
+    ProgressData(title: "Attributes", progress: 1.0, status: Status.completed),
+    ProgressData(title: "Windows", progress: 0.5, status: Status.inprogress),
+    ProgressData(title: "D&M Survey", progress: 0.2, status: Status.upcoming),
+    ProgressData(title: "Repairs", progress: 0.9, status: Status.inprogress),
+    ProgressData(title: "HHSRS", progress: 1.0, status: Status.completed),
   ];
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProjectViewModel>().getPropertyDetail();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            padding: .all(16.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: Column(
-              crossAxisAlignment: .start,
-              children: [
-                Row(
+      child: Selector<ProjectViewModel, (bool, PropertyDetailResponse)>(
+        selector: (_, vm) => (vm.loading, vm.propertyDetailData),
+        builder: (context, state, _) {
+          final loading = state.$1;
+          final data = state.$2.data?.property;
+          if (loading) {
+            return const Expanded(
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (data == null) {
+            return const Expanded(child: Center(child: Text('No Data Found')));
+          }
+          return Column(
+            children: [
+              Container(
+                padding: .all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Column(
+                  crossAxisAlignment: .start,
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(22.w),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryLight,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        TablerIcons.homeSearch,
-                        color: AppColors.primaryDark,
-                        size: 44.sp,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text("UPRN:", style: AppFonts.grey14w400),
-                        Text("71045", style: AppFonts.black24w600),
+                        Container(
+                          padding: EdgeInsets.all(22.w),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryLight,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            TablerIcons.homeSearch,
+                            color: AppColors.primaryDark,
+                            size: 44.sp,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("UPRN:", style: AppFonts.grey14w400),
+                            Text(
+                              data.uprn ?? 'N/A',
+                              style: AppFonts.black24w600,
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        StatusChip(status: data.status ?? Status.completed),
                       ],
                     ),
-                    const Spacer(),
-                    const StatusChip(status: InspectionStatus.inProgress),
-                  ],
-                ),
-                SizedBox(height: 16.sp),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.lightGrey2),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Wrap(
-                    alignment: .start,
-                    runSpacing: 16.sp,
-                    children: List.generate(
-                      detailList.length,
-                      (index) => _buildDetailColumn(
-                        detailList[index].title,
-                        detailList[index].value,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20.sp),
-          _buildTenantdetail(
-            title: "Assigned Surveyor",
-            name: "Michael Smith",
-            email: "michael@gmail.com",
-            phone: "+1 234 567 890",
-            imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-            context: context,
-          ),
-          SizedBox(height: 20.sp),
-          Container(
-            padding: .all(16.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16.r),
-            ),
-            child: Column(
-              children: [
-                // In your widget tree
-                AdaptiveLayoutRowColumn(
-                  alignment: .spaceBetween,
-
-                  children: [
-                    ValueListenableBuilder<PropertyDetailFilter>(
-                      valueListenable: selectedFilter,
-                      builder: (context, current, _) {
-                        return AdaptiveLayoutRowColumn(
-                          widthBetween: 8.w,
-                          heightBetween: 12.sp,
-                          children: PropertyDetailFilter.values.map((filter) {
-                            final isSelected = current == filter;
-                            return GestureDetector(
-                              onTap: () => selectedFilter.value = filter,
-                              child: Container(
-                                width: context.isLandscape
-                                    ? null
-                                    : double.infinity,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16.w,
-                                  vertical: 9.sp,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.primaryLight
-                                      : AppColors.white,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? AppColors.primaryLight
-                                        : AppColors.lightGrey2,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    filter.label,
-                                    style: AppFonts.black16w500.copyWith(
-                                      color: isSelected
-                                          ? AppColors.primaryDark
-                                          : AppColors.textBlack,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-
+                    SizedBox(height: 16.sp),
                     Container(
-                      height: 43.sp,
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16.w),
                       decoration: BoxDecoration(
-                        color: AppColors.textBlack,
-
+                        border: Border.all(color: AppColors.lightGrey2),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Wrap(
+                        alignment: .start,
+                        runSpacing: 16.sp,
                         children: [
-                          Text(
-                            'Download Full Report ',
-                            style: AppFonts.white14w500,
+                          SizedBox(
+                            width: 207.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Date:", style: AppFonts.grey14w400),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  data.createdAt?.toFormattedDate() ?? 'N/A',
+                                  style: AppFonts.black14w400,
+                                ),
+                              ],
+                            ),
                           ),
-                          SizedBox(width: 4.w),
-                          Icon(
-                            TablerIcons.download,
-                            size: 18.sp,
-                            color: AppColors.white,
+                          SizedBox(
+                            width: 207.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Postal Code:",
+                                  style: AppFonts.grey14w400,
+                                ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  data.postCode ?? 'N/A',
+                                  style: AppFonts.black14w400,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 207.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Town:", style: AppFonts.grey14w400),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  data.town ?? 'N/A',
+                                  style: AppFonts.black14w400,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 207.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Year Build:", style: AppFonts.grey14w400),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  "${data.yearBuild ?? 'N/A'}",
+                                  style: AppFonts.black14w400,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 207.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Property Type:",
+                                  style: AppFonts.grey14w400,
+                                ),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  "${data?.getType?.name?.capitalize ?? 'N/A'}",
+                                  style: AppFonts.black14w400,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 207.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Address:", style: AppFonts.grey14w400),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  data?.address ?? 'N/A',
+                                  style: AppFonts.black14w400,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 16.sp),
-                ValueListenableBuilder<PropertyDetailFilter>(
-                  valueListenable: selectedFilter,
-                  builder: (context, current, _) {
-                    if (selectedFilter.value ==
-                        PropertyDetailFilter.modulesOverview) {
-                      return MasonryGridView.count(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16.sp,
-                        crossAxisSpacing: 16.w,
-                        itemBuilder: (context, index) {
-                          final progressData = progressDataList[index];
-                          return _buildProgressBar(
-                            title: progressData.title,
-                            progress: progressData.progress,
-                            status: progressData.status,
-                          );
-                        },
-                        itemCount: progressDataList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                      );
-                    } else {
-                      return AdaptiveLayoutRowColumn(
-                        widthBetween: 16.w,
-                        heightBetween: 16.sp,
-                        expandedWidget: context.isLandscape ? true : false,
-                        children: List.generate(
-                          costSummaryDataList.length,
-                          (index) => _buildCostSummary(
-                            title: costSummaryDataList[index].title,
-                            value: costSummaryDataList[index].value,
+              ),
+              SizedBox(height: 20.sp),
+              Container(
+                padding: EdgeInsets.all(16.sp),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.r),
+                  color: AppColors.white,
+                ),
+                child: Column(
+                  crossAxisAlignment: context.isLandscape
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.center,
+                  children: [
+                    Text("Assigned Surveyor", style: AppFonts.black18w500),
+                    SizedBox(height: 16.sp),
+
+                    AdaptiveLayoutRowColumn(
+                      heightBetween: 16.sp,
+                      widthBetween: 16.w,
+                      alignment: .center,
+                      crossAxisAlignment: .center,
+
+                      children: [
+                        CircleAvatar(
+                          radius: 32.r,
+                          backgroundColor: AppColors.lightGrey1,
+                          backgroundImage: const NetworkImage(
+                            'https://picsum.photos/400/400',
                           ),
                         ),
-                      );
-                    }
-                  },
+                        if (data?.surveyor != null)
+                          Column(
+                            crossAxisAlignment: context.isLandscape
+                                ? CrossAxisAlignment.start
+                                : CrossAxisAlignment.center,
+
+                            children: [
+                              Text(
+                                data?.surveyor?.name ?? "N/A",
+                                style: AppFonts.black18w500,
+                              ),
+                              SizedBox(height: 8.w),
+                              AdaptiveLayoutRowColumn(
+                                widthBetween: 12.w,
+                                heightBetween: 12.w,
+
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: context.isLandscape
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        TablerIcons.mail,
+                                        size: 16,
+                                        color: AppColors.textBlack,
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Text(
+                                        data?.surveyor?.email ?? 'N/A',
+                                        style: AppFonts.black14w400,
+                                      ),
+                                    ],
+                                  ),
+
+                                  Row(
+                                    mainAxisAlignment: context.isLandscape
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        TablerIcons.phone,
+                                        size: 16,
+                                        color: AppColors.textBlack,
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Text(
+                                        data
+                                                ?.surveyor
+                                                ?.profile
+                                                ?.contactNumber ??
+                                            'N/A',
+                                        style: AppFonts.black14w400,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8.w),
+                              AdaptiveLayoutRowColumn(
+                                widthBetween: 12.w,
+                                heightBetween: 12.w,
+
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: context.isLandscape
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time_filled,
+                                        size: 16,
+                                        color: AppColors.textBlack,
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Text(
+                                        data?.slot ?? 'N/A',
+                                        style: AppFonts.black14w400,
+                                      ),
+                                    ],
+                                  ),
+
+                                  Row(
+                                    mainAxisAlignment: context.isLandscape
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        TablerIcons.calendar,
+                                        size: 16,
+                                        color: AppColors.textBlack,
+                                      ),
+                                      SizedBox(width: 10.w),
+                                      Text(
+                                        data?.inspectionDate ?? 'N/A',
+                                        style: AppFonts.black14w400,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        else
+                          Center(
+                            child: Text(
+                              "N/A",
+                              style: AppFonts.black22w600,
+                              textAlign: .center,
+                            ),
+                          ),
+
+                        context.isLandscape
+                            ? const Spacer()
+                            : const SizedBox.shrink(),
+                        IconButton(
+                          icon: const Icon(TablerIcons.arrowUpRight),
+                          iconSize: 24.sp,
+                          color: AppColors.textBlack,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+
+              // _buildTenantdetail(
+              //   title: "Assigned Surveyor",
+              //   name: "Michael Smith",
+              //   email: "michael@gmail.com",
+              //   phone: "+1 234 567 890",
+              //   imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
+              //   context: context,
+              // ),
+              SizedBox(height: 20.sp),
+              Container(
+                padding: .all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Column(
+                  children: [
+                    // In your widget tree
+                    AdaptiveLayoutRowColumn(
+                      alignment: .spaceBetween,
+
+                      children: [
+                        ValueListenableBuilder<PropertyDetailFilter>(
+                          valueListenable: selectedFilter,
+                          builder: (context, current, _) {
+                            return AdaptiveLayoutRowColumn(
+                              widthBetween: 8.w,
+                              heightBetween: 12.sp,
+                              children: PropertyDetailFilter.values.map((
+                                filter,
+                              ) {
+                                final isSelected = current == filter;
+                                return GestureDetector(
+                                  onTap: () => selectedFilter.value = filter,
+                                  child: Container(
+                                    width: context.isLandscape
+                                        ? null
+                                        : double.infinity,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w,
+                                      vertical: 9.sp,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? AppColors.primaryLight
+                                          : AppColors.white,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.primaryLight
+                                            : AppColors.lightGrey2,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        filter.label,
+                                        style: AppFonts.black16w500.copyWith(
+                                          color: isSelected
+                                              ? AppColors.primaryDark
+                                              : AppColors.textBlack,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+
+                        Container(
+                          height: 43.sp,
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.textBlack,
+
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Download Full Report ',
+                                style: AppFonts.white14w500,
+                              ),
+                              SizedBox(width: 4.w),
+                              Icon(
+                                TablerIcons.download,
+                                size: 18.sp,
+                                color: AppColors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.sp),
+                    ValueListenableBuilder<PropertyDetailFilter>(
+                      valueListenable: selectedFilter,
+                      builder: (context, current, _) {
+                        if (selectedFilter.value ==
+                            PropertyDetailFilter.modulesOverview) {
+                          return MasonryGridView.count(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 16.sp,
+                            crossAxisSpacing: 16.w,
+                            itemBuilder: (context, index) {
+                              final progressData = progressDataList[index];
+                              return _buildProgressBar(
+                                title: progressData.title,
+                                progress: progressData.progress,
+                                status: progressData.status,
+                              );
+                            },
+                            itemCount: progressDataList.length,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                          );
+                        } else {
+                          return AdaptiveLayoutRowColumn(
+                            widthBetween: 16.w,
+                            heightBetween: 16.sp,
+                            expandedWidget: context.isLandscape ? true : false,
+                            children: List.generate(
+                              costSummaryDataList.length,
+                              (index) => _buildCostSummary(
+                                title: costSummaryDataList[index].title,
+                                value: costSummaryDataList[index].value,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -283,7 +538,7 @@ class PropertyDetail extends StatelessWidget {
   Widget _buildProgressBar({
     required String title,
     required double progress,
-    required InspectionStatus status,
+    required Status status,
   }) {
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -319,105 +574,91 @@ class PropertyDetail extends StatelessWidget {
     );
   }
 
-  Widget _buildTenantdetail({
-    required String title,
-    required String name,
-    required String email,
-    required String phone,
-    required String imageUrl,
-    required BuildContext context,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(16.sp),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        color: AppColors.white,
-      ),
-      child: Column(
-        crossAxisAlignment: context.isLandscape
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
-        children: [
-          Text(title, style: AppFonts.black18w500),
-          SizedBox(height: 16.sp),
-          AdaptiveLayoutRowColumn(
-            heightBetween: 16.sp,
-            widthBetween: 16.w,
+  // Widget _buildTenantdetail({
+  //   required String title,
+  //   required String name,
+  //   required String email,
+  //   required String phone,
+  //   required String imageUrl,
+  //   required BuildContext context,
+  // }) {
+  //   return Container(
+  //     padding: EdgeInsets.all(16.sp),
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(16.r),
+  //       color: AppColors.white,
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: context.isLandscape
+  //           ? CrossAxisAlignment.start
+  //           : CrossAxisAlignment.center,
+  //       children: [
+  //         Text(title, style: AppFonts.black18w500),
+  //         SizedBox(height: 16.sp),
+  //         AdaptiveLayoutRowColumn(
+  //           heightBetween: 16.sp,
+  //           widthBetween: 16.w,
 
-            children: [
-              CircleAvatar(
-                radius: 32.r,
-                backgroundColor: AppColors.lightGrey1,
-                backgroundImage: const NetworkImage(
-                  'https://picsum.photos/400/400',
-                ),
-              ),
+  //           children: [
+  //             CircleAvatar(
+  //               radius: 32.r,
+  //               backgroundColor: AppColors.lightGrey1,
+  //               backgroundImage: const NetworkImage(
+  //                 'https://picsum.photos/400/400',
+  //               ),
+  //             ),
 
-              Column(
-                crossAxisAlignment: context.isLandscape
-                    ? CrossAxisAlignment.start
-                    : CrossAxisAlignment.center,
-                children: [
-                  Text(name, style: AppFonts.black18w500),
-                  SizedBox(height: 8.w),
-                  AdaptiveLayoutRowColumn(
-                    widthBetween: 12.w,
-                    heightBetween: 12.w,
+  //             Column(
+  //               crossAxisAlignment: context.isLandscape
+  //                   ? CrossAxisAlignment.start
+  //                   : CrossAxisAlignment.center,
+  //               children: [
+  //                 Text(name, style: AppFonts.black18w500),
+  //                 SizedBox(height: 8.w),
+  //                 AdaptiveLayoutRowColumn(
+  //                   widthBetween: 12.w,
+  //                   heightBetween: 12.w,
 
-                    children: [
-                      Row(
-                        mainAxisAlignment: context.isLandscape
-                            ? MainAxisAlignment.start
-                            : MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            TablerIcons.mail,
-                            size: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          SizedBox(width: 10.w),
-                          Text(email, style: AppFonts.black14w400),
-                        ],
-                      ),
+  //                   children: [
+  //                     Row(
+  //                       mainAxisAlignment: context.isLandscape
+  //                           ? MainAxisAlignment.start
+  //                           : MainAxisAlignment.center,
+  //                       children: [
+  //                         const Icon(
+  //                           TablerIcons.mail,
+  //                           size: 16,
+  //                           color: AppColors.textBlack,
+  //                         ),
+  //                         SizedBox(width: 10.w),
+  //                         Text(email, style: AppFonts.black14w400),
+  //                       ],
+  //                     ),
 
-                      Row(
-                        mainAxisAlignment: context.isLandscape
-                            ? MainAxisAlignment.start
-                            : MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            TablerIcons.phone,
-                            size: 16,
-                            color: AppColors.textBlack,
-                          ),
-                          SizedBox(width: 10.w),
-                          Text(phone, style: AppFonts.black14w400),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailColumn(String title, String value) {
-    return SizedBox(
-      width: 207.w,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppFonts.grey14w400),
-          SizedBox(width: 8.w),
-          Text(value, style: AppFonts.black14w400),
-        ],
-      ),
-    );
-  }
+  //                     Row(
+  //                       mainAxisAlignment: context.isLandscape
+  //                           ? MainAxisAlignment.start
+  //                           : MainAxisAlignment.center,
+  //                       children: [
+  //                         const Icon(
+  //                           TablerIcons.phone,
+  //                           size: 16,
+  //                           color: AppColors.textBlack,
+  //                         ),
+  //                         SizedBox(width: 10.w),
+  //                         Text(phone, style: AppFonts.black14w400),
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
 
 class Detail {
@@ -439,7 +680,7 @@ final List<Detail> detailList = [
 class ProgressData {
   final String title;
   final double progress;
-  final InspectionStatus status;
+  final Status status;
 
   ProgressData({
     required this.title,

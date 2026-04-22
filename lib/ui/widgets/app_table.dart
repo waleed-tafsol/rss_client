@@ -147,8 +147,8 @@ class AppTable extends StatelessWidget {
       case 5:
         child = StatusChip(
           status: data?.status == 0
-              ? InspectionStatus.inProgress
-              : InspectionStatus.completed,
+              ? Status.inprogress
+              : Status.completed,
         );
         break;
       case 6:

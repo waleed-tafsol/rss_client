@@ -15,6 +15,7 @@ import 'app_network_image.dart';
 import 'app_secondary_button.dart';
 import 'app_text_field.dart';
 import 'image_selection_dailog_box.dart';
+import 'phone_widget.dart';
 
 class ProfileForm extends StatefulWidget {
   const ProfileForm({super.key});
@@ -134,9 +135,13 @@ class _ProfileFormState extends State<ProfileForm> {
               ],
             ),
             SizedBox(height: 16.sp),
-            AppTextField(
-              controller: contactNumberController,
-              title: 'Contact Number',
+            Column(
+              crossAxisAlignment: .start,
+              children: [
+                Text("Contact Number", style: AppFonts.black14w400),
+                SizedBox(height: 12.sp),
+                PhoneWidget(controller: contactNumberController),
+              ],
             ),
             SizedBox(height: 16.sp),
             Row(

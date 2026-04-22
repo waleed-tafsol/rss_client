@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -68,6 +69,14 @@ class AuthViewModel extends BaseViewModel {
 
   void updateProfileImage(XFile? imageBytes) {
     profileImage = imageBytes;
+    notifyListeners();
+  }
+
+  CountryCode? country = CountryCode.tryFromCountryCode('GB');
+
+  void setCountry(CountryCode value) {
+    country = value;
+    log("Country === ${country?.dialCode}");
     notifyListeners();
   }
 

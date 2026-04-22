@@ -9,10 +9,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import '../../exceptions/app_exception.dart';
 
 abstract class BaseViewModel extends ChangeNotifier {
-
-
-
-
   Future<T?> runSafely<T>(AsyncValueGetter<T> action) async {
     try {
       return await action.call();

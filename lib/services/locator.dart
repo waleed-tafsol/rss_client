@@ -18,6 +18,7 @@ import '../models/requests/verify_otp_request.dart';
 import '../models/responses/base_response.dart';
 import '../models/responses/get_me_response.dart';
 import '../models/responses/project_list_response.dart';
+import '../models/responses/property_detail_response.dart';
 import '../models/responses/user_history_response.dart';
 
 part 'auth_service.dart';

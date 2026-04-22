@@ -28,4 +28,19 @@ class ProjectService {
     }
     return response.data!;
   }
+
+
+   Future<PropertyDetailResponse> getPropertyDetail({required int id}) async {
+    
+    final response = await locator<ProjectApi>().getPropertyDetailResponse(
+     id
+    );
+   
+    if (response.success != true || response.data == null) {
+      throw AppException(
+        response.message ?? 'Something went wrong!',
+      );
+    }
+    return response;
+  }
 }

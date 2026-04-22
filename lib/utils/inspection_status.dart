@@ -3,36 +3,36 @@ import 'dart:ui';
 import '../ui/resources/app_colors.dart';
 import 'enums.dart';
 
-extension InspectionStatusExtension on InspectionStatus {
+extension StatusExtension on Status {
   String get label {
     switch (this) {
-      case InspectionStatus.inProgress:
+      case Status.inprogress:
         return 'In Progress';
-      case InspectionStatus.upcoming:
-        return 'Upcoming';
-      case InspectionStatus.completed:
+      case Status.upcoming:
+        return 'UpComing';
+      case Status.completed:
         return 'Completed';
     }
   }
 
   Color get fontColor {
     switch (this) {
-      case InspectionStatus.inProgress:
+      case Status.inprogress:
         return AppColors.blue;
-      case InspectionStatus.upcoming:
+      case Status.upcoming:
         return AppColors.yellow;
-      case InspectionStatus.completed:
+      case Status.completed:
         return AppColors.darkGreen;
     }
   }
 
   Color get backgroundColor {
     switch (this) {
-      case InspectionStatus.inProgress:
+      case Status.inprogress:
         return AppColors.lightBlue.withValues(alpha: 0.2);
-      case InspectionStatus.upcoming:
+      case Status.upcoming:
         return AppColors.lightYellow;
-      case InspectionStatus.completed:
+      case Status.completed:
         return AppColors.lightGreen;
 
     }

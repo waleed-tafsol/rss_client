@@ -205,8 +205,8 @@ class _AuthApi implements AuthApi {
     if (contactNumber != null) {
       _data.fields.add(MapEntry('contact_number', contactNumber));
     }
-    if (profileImage != null) {
-      _data.files.add(MapEntry('profile_image', profileImage));
+    if(profileImage != null){
+    _data.files.add(MapEntry('profile_image', profileImage));
     }
     if (currentPassword != null) {
       _data.fields.add(MapEntry('current_password', currentPassword));
